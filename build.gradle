@@ -1,0 +1,56 @@
+plugins {
+  id 'groovy'
+  id 'java-gradle-plugin'
+  id 'maven-publish'
+}
+
+// Package info
+def pluginGroupId = 'com.mux.gradle.android'
+def pluginArtifactId = 'mux-android-distribution'
+def pluginVersion = '1.0-SNAPSHOT'
+
+group pluginGroupId
+version pluginVersion
+
+repositories {
+  mavenCentral()
+}
+
+gradlePlugin {
+  plugins {
+    muxAndroidDistribution {
+      implementationClass = 'com.mux.gradle.android.MuxDistributionPlugin'
+      // Why make it anything else?
+      id = "$pluginGroupId.$pluginArtifactId"
+    }
+  }
+}
+
+publishing {
+  publications {
+    release(MavenPublication) {
+      groupId = pluginGroupId
+      artifactId = pluginArtifactId
+      version = pluginVersion
+
+      from components.java
+
+      pom {
+        name = pluginArtifactId
+        description = "Mux's Distribution plugin for Android plugins"
+      }
+    }
+  }
+}
+
+dependencies {
+  implementation 'org.apache.groovy:groovy:4.0.4'
+  implementation gradleApi()
+
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+test {
+  useJUnitPlatform()
+}
