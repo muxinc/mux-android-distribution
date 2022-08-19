@@ -1,19 +1,63 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
+  }
+}
+
 plugins {
   id 'groovy'
   id 'java-gradle-plugin'
+  id 'com.jfrog.artifactory' version '4.29.0'
   id 'maven-publish'
 }
 
 // Package info
+def pluginVersion = '0.0.11'
 def pluginGroupId = 'com.mux.gradle.android'
 def pluginArtifactId = 'mux-android-distribution'
-def pluginVersion = '1.0-SNAPSHOT'
+def artifactoryCredential = { key ->
+  def propsFile = project.rootProject.file('local.properties')
+  if (propsFile.exists()) {
+    Properties props = new Properties()
+    props.load(propsFile.newDataInputStream())
+    return props.getProperty(key)
+  } else if (System.getenv("ORG_GRADLE_PROJECT_$key") != null) {
+    return System.getenv("ORG_GRADLE_PROJECT_$key")
+  }
+}
+def artifactoryUser = artifactoryCredential('artifactory_user')
+def artifactoryPassword = artifactoryCredential('artifactory_password')
 
 group pluginGroupId
 version pluginVersion
+artifactory {
+  contextUrl = "https://muxinc.jfrog.io/artifactory/"
+  publish {
+    repository {
+      repoKey = 'default-maven-local'
+      username = artifactoryUser
+      password = artifactoryPassword
+    }
+    defaults {
+      publications 'ALL_PUBLICATIONS'
+    }
+  }
+}
 
 repositories {
   mavenCentral()
+  google()
+
+  maven {
+    url 'https://muxinc.jfrog.io/artifactory/default-maven-local'
+    credentials {
+      username artifactoryUser
+      password artifactoryPassword
+    }
+  }
 }
 
 gradlePlugin {
@@ -26,26 +70,19 @@ gradlePlugin {
   }
 }
 
-publishing {
-  publications {
-    release(MavenPublication) {
-      groupId = pluginGroupId
-      artifactId = pluginArtifactId
-      version = pluginVersion
-
-      from components.java
-
-      pom {
-        name = pluginArtifactId
-        description = "Mux's Distribution plugin for Android plugins"
-      }
-    }
+allprojects {
+  tasks.withType(JavaCompile) {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
   }
 }
 
 dependencies {
   implementation 'org.apache.groovy:groovy:4.0.4'
+  implementation 'com.android.tools.build:gradle:7.2.2'
+  implementation 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
   implementation gradleApi()
+  implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
