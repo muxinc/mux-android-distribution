@@ -1,61 +1,32 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
-  }
-}
-
 plugins {
   id 'groovy'
   id 'java-gradle-plugin'
-  id 'com.jfrog.artifactory' version '4.29.0'
   id 'maven-publish'
-}
-
-// Package info
-def pluginVersion = '0.0.11'
-def pluginGroupId = 'com.mux.gradle.android'
-def pluginArtifactId = 'mux-android-distribution'
-def artifactoryCredential = { key ->
-  def propsFile = project.rootProject.file('local.properties')
-  if (propsFile.exists()) {
-    Properties props = new Properties()
-    props.load(propsFile.newDataInputStream())
-    return props.getProperty(key)
-  } else if (System.getenv("ORG_GRADLE_PROJECT_$key") != null) {
-    return System.getenv("ORG_GRADLE_PROJECT_$key")
-  }
-}
-def artifactoryUser = artifactoryCredential('artifactory_user')
-def artifactoryPassword = artifactoryCredential('artifactory_password')
-
-group pluginGroupId
-version pluginVersion
-artifactory {
-  contextUrl = "https://muxinc.jfrog.io/artifactory/"
-  publish {
-    repository {
-      repoKey = 'default-maven-local'
-      username = artifactoryUser
-      password = artifactoryPassword
-    }
-    defaults {
-      publications 'ALL_PUBLICATIONS'
-    }
-  }
 }
 
 repositories {
   mavenCentral()
   google()
+}
 
-  maven {
-    url 'https://muxinc.jfrog.io/artifactory/default-maven-local'
-    credentials {
-      username artifactoryUser
-      password artifactoryPassword
+// distribute the distribution plugin
+def pluginVersion = '0.1.0'
+def pluginGroupId = 'com.mux.gradle.android'
+def pluginArtifactId = 'mux-android-distribution'
+version pluginVersion
+group pluginGroupId
+java {
+  withSourcesJar()
+}
+publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url 'https://maven.pkg.github.com/muxinc/mux-android-distribution'
+      credentials {
+        username System.getenv("GH_USER")
+        password System.getenv("TOKEN")
+      }
     }
   }
 }
