@@ -10,7 +10,7 @@ repositories {
 }
 
 // distribute the distribution plugin
-def pluginVersion = '0.0.16'
+def pluginVersion = '0.1.0'
 def pluginGroupId = 'com.mux.gradle.android'
 def pluginArtifactId = 'mux-android-distribution'
 version pluginVersion
