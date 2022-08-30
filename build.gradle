@@ -22,8 +22,8 @@ publishing {
       name = "GitHubPackages"
       url 'https://maven.pkg.github.com/muxinc/mux-android-distribution'
       credentials {
-        username 'edixon@mux.com'//System.getenv("GH_USER")
-        password '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' //System.getenv("TOKEN")
+        username System.getenv("GH_USER")
+        password System.getenv("TOKEN")
       }
     }
   }
