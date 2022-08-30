@@ -1,11 +1,11 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
-  }
-}
+//buildscript {
+//  repositories {
+//    mavenCentral()
+//  }
+//  dependencies {
+//    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
+//  }
+//}
 
 plugins {
   id 'groovy'
@@ -33,31 +33,32 @@ def artifactoryPassword = artifactoryCredential('artifactory_password')
 
 group pluginGroupId
 version pluginVersion
-artifactory {
-  contextUrl = "https://muxinc.jfrog.io/artifactory/"
-  publish {
-    repository {
-      repoKey = 'default-maven-local'
-      username = artifactoryUser
-      password = artifactoryPassword
-    }
-    defaults {
-      publications 'ALL_PUBLICATIONS'
-    }
-  }
-}
+//artifactory {
+//  contextUrl = "https://muxinc.jfrog.io/artifactory/"
+//  publish {
+//    repository {
+//      repoKey = 'default-maven-local'
+//      username = artifactoryUser
+//      password = artifactoryPassword
+//    }
+//    defaults {
+//      publications 'ALL_PUBLICATIONS'
+//    }
+//  }
+//}
+
 
 repositories {
   mavenCentral()
   google()
 
-  maven {
-    url 'https://muxinc.jfrog.io/artifactory/default-maven-local'
-    credentials {
-      username artifactoryUser
-      password artifactoryPassword
-    }
-  }
+//  maven {
+//    url 'https://muxinc.jfrog.io/artifactory/default-maven-local'
+//    credentials {
+//      username artifactoryUser
+//      password artifactoryPassword
+//    }
+//  }
 }
 
 gradlePlugin {
