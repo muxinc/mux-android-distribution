@@ -80,7 +80,12 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
           // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
           def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
-          variantNames.each { singleVariant(it) }
+          variantNames.each {
+            singleVariant(it)  {
+              withSourcesJar()
+              withJavadocJar()
+            }
+          }
         }
       } // finalizeDsl
     } // project.androidComponents
