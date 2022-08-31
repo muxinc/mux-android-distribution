@@ -13,10 +13,10 @@ In your project's top-level `build.gradle` file, add our repo and add the depend
 ```groovy
 buildscript {
   repositories {
-    maven { url 'https://maven.pkg.github.com/muxinc/mux-android-distribution' }
+    maven { url 'https://muxinc.jfrog.io/artifactory/default-maven-local' }
   }
   dependencies {
-    classpath 'com.mux.gradle.android:mux-android-distribution:0.1.0'
+    classpath 'com.mux.gradle.android:mux-android-distribution:0.1.1'
   }
 }
 ```
