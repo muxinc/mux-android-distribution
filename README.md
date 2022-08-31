@@ -4,7 +4,7 @@ This is Mux's Gradle plugin for distributing our Android Libraries. It automatic
 variant that should be published, allowing them to be published to a remote repository. This plugin offers some
 improvements over Google's library publishing API, such as the ability to programmatically customize the coordinates on
 a per-variant basis, the generation of version strings, and a predicate-based interface for selecting which variants to
-publish. 
+publish. This plugin works alongside/on top of Google's new library publishing APIs and does not replace it
 
 This plugin optionally supports Artifactory, though customizing the artifactory integration is still TODO
 
@@ -60,11 +60,16 @@ $ ./gradlew artifactoryPublish
 The plugin is very configurable. Artifact IDs, Group IDs, and Versions can be generated on a per-variant basis. There
 are a few built-in strategies for generating each, and you can also write your own.
 
-Here's the configuration we use for our ExoPlayer SDK:
+For example, Here's the configuration we use for our ExoPlayer SDK:
 
 ```groovy
 muxDistribution {
-  devVersion versionFromCommitHash("dev-")
+  def buildKite = System.getenv("BUILDKITE_BRANCH") != null
+  if (buildKite) {
+    devVersion versionFromCommitHash('dev-', System.getenv("BUILDKITE_BRANCH"))
+  } else {
+    devVersion versionFromCommitHash('dev-')
+  }
   releaseVersion versionFromHeadCommit()
   artifactIds artifactFromFlavorValue('api')
   groupIds just("com.mux.stats.sdk.muxstats")
@@ -103,7 +108,7 @@ There are prebuilt strategies creating maven coordinates. They cover some common
 | artifactId                  | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then catenating the values of each flavor (in dimension order)                              |
 | artifactId                  | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.        |
 | devVersion, releaseVersion  | `versionFromHeadCommit`                          | generates a version name from the message of the HEAD commit of the current branch, looking for a token that looks like `v1.2.3` or something similarly-formatted |
-| devVersion, releaseVersion  | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev;`                              |
+| devVersion, releaseVersion  | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever                             |
 | anything                    | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                     |
 
 #### Using your own logic
@@ -124,3 +129,7 @@ muxDistribution {
   groupIds { it.name.contains("whiteLabelA") ? "com.companyA.library.android" : "com.own.company.library.android" }
 }
 ```
+
+## Distributing Updates of this Plugin
+
+To distribute an update of this plugin, all you have to do is bump the plugin version in `build.gradle` then create a new release. An Action will deploy to Artifactory/packages from there.
