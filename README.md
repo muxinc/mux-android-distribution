@@ -1,6 +1,6 @@
 # Mux Android Distribution Plugin
 
-This is Mux's Gradle plugin for distributing our Android Libraries. It automatically creates publications for each build
+This is Mux's Gradle plugin for distributing our multi-variant Android Libraries. It automatically creates publications for each build
 variant that should be published, allowing them to be published to a remote repository. This plugin offers some
 improvements over Google's library publishing API, such as the ability to programmatically customize the coordinates on
 a per-variant basis, the generation of version strings, and a predicate-based interface for selecting which variants to
