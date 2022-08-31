@@ -147,7 +147,7 @@ abstract class MuxDistributionPluginExtension {
   }
 
   @SuppressWarnings('GrMethodMayBeStatic')
-  def artifactFromAllVariants() {
+  def artifactFromAllFlavors() {
     return { variant ->
       def artifactId = project.name
       variant.productFlavors.each {
