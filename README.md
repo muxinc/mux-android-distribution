@@ -21,7 +21,7 @@ buildscript {
 }
 ```
 
-### Apply, Configure & go
+### Apply, Configure & Go
 
 In your Library Module's `build.gradle`, apply this plugin:
 
@@ -70,7 +70,7 @@ muxDistribution {
 }
 ```
 
-### Pick which Variants are distributed
+### Pick Which Variants are Distributed
 
 By default, all non-debug variants are distributed by this plugin. If you want the plugin to skip certain variants, you
 can do so according to your own logic. Some prebuilt functions are provided
