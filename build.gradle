@@ -39,7 +39,7 @@ artifactory {
   contextUrl = "https://muxinc.jfrog.io/artifactory/"
   publish {
     repository {
-      repoKey = 'default-maven-local'
+      repoKey = 'default-maven-release-local'
       username = artifactoryUser
       password = artifactoryPassword
     }
@@ -56,7 +56,7 @@ java {
 publishing {
   repositories {
     maven {
-      url 'https://muxinc.jfrog.io/artifactory/default-maven-local'
+      url 'https://muxinc.jfrog.io/artifactory/default-maven-release-local'
       credentials {
         username artifactoryUser
         password artifactoryPassword
