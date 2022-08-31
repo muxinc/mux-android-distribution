@@ -60,11 +60,16 @@ $ ./gradlew artifactoryPublish
 The plugin is very configurable. Artifact IDs, Group IDs, and Versions can be generated on a per-variant basis. There
 are a few built-in strategies for generating each, and you can also write your own.
 
-Here's the configuration we use for our ExoPlayer SDK:
+For example, Here's the configuration we use for our ExoPlayer SDK:
 
 ```groovy
 muxDistribution {
-  devVersion versionFromCommitHash("dev-")
+  def buildKite = System.getenv("BUILDKITE_BRANCH") != null
+  if (buildKite) {
+    devVersion versionFromCommitHash('dev-', System.getenv("BUILDKITE_BRANCH"))
+  } else {
+    devVersion versionFromCommitHash('dev-')
+  }
   releaseVersion versionFromHeadCommit()
   artifactIds artifactFromFlavorValue('api')
   groupIds just("com.mux.stats.sdk.muxstats")
