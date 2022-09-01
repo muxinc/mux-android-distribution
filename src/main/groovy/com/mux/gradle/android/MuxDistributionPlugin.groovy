@@ -1,6 +1,5 @@
 package com.mux.gradle.android
 
-
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -38,6 +37,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     initConventions()
 
     declareRepository()
+    addVersionName()
     declarePublicationVariants()
     declarePublications()
     if (useArtifactory()) {
@@ -64,6 +64,15 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
+  private void addVersionName() {
+    project.androidComponents {
+      finalizeDsl() { ext ->
+        ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
+      }
+    }
+  }
+
+  @SuppressWarnings('GrUnresolvedAccess')
   private void declarePublicationVariants() {
     project.androidComponents {
       finalizeDsl() { ext ->
@@ -80,7 +89,12 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
           // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
           def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
-          variantNames.each { singleVariant(it) }
+          variantNames.each {
+            singleVariant(it) {
+              withSourcesJar()
+              withJavadocJar()
+            }
+          }
         }
       } // finalizeDsl
     } // project.androidComponents
@@ -119,7 +133,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           createdPublications += project.extensions.findByType(PublishingExtension).publications.create(variant.name, MavenPublication) { pub ->
             from project.components.findByName(variant.name)
             artifactId deployArtifactId(variant)
-            version deployVersion(variant)
+            version deployVersion()
             groupId extension.groupIdStrategy.get().call(variant)
             // TODO: configure the pom
           } // if(...)
@@ -201,6 +215,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.deployRepoUrl.convention('https://muxinc.jfrog.io/artifactory/default-maven-local')
     extension.artifactoryRepoKey.convention('default-maven-local')
     extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
+    extension.versionFieldInBuildConfig.convention("LIB_VERSION")
   }
 
   private ArtifactoryCredentials artifactoryCredentials() {
@@ -216,11 +231,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
     return extension.artifactIdStrategy.get().call(variant)
   }
 
-  private def deployVersion = { variant ->
-    if (extension.publicReleaseIf.get().call(variant)) {
-      return extension.releaseVersionStrategy.get().call(variant).trim()
+  private def deployVersion = {
+    if (extension.publicReleaseIf.get().call()) {
+      return extension.releaseVersionStrategy.get().call().trim()
     } else {
-      return extension.devVersionStrategy.get().call(variant).trim()
+      return extension.devVersionStrategy.get().call().trim()
     }
   }
 
