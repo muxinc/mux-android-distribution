@@ -18,6 +18,8 @@ abstract class MuxDistributionPluginExtension {
 
   abstract Property<Closure> getGroupIdStrategy()
 
+  abstract Property<String> getVersionFieldInBuildConfig()
+
   /**
    * A Closure with a single parameter of the type LibraryVariant. Users may add logic to generate artifactIds for
    * each variant of their library
