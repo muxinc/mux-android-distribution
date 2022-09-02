@@ -91,6 +91,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
           variantNames.each {
             singleVariant(it) {
+              // TODO: Let users choose whether to do this
               withSourcesJar()
               withJavadocJar()
             }
@@ -125,7 +126,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     return names
   }
 
-  @SuppressWarnings('GrUnresolvedAccess')
+  @SuppressWarnings(['GrUnresolvedAccess', 'GroovyAssignabilityCheck'])
   private void declarePublications() {
     project.afterEvaluate {
       project.android.libraryVariants.each { variant ->
@@ -135,7 +136,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
             artifactId deployArtifactId(variant)
             version deployVersion()
             groupId extension.groupIdStrategy.get().call(variant)
-            // TODO: configure the pom
+
+            // configure the pom from outside
+            if (extension.pomFunction != null) {
+              pom { extension.pomFunction.execute(it) }
+            }
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()

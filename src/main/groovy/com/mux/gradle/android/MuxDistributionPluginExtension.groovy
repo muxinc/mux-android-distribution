@@ -1,13 +1,19 @@
 package com.mux.gradle.android
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.provider.Property
+import org.gradle.api.publish.maven.MavenPom
 
 abstract class MuxDistributionPluginExtension {
 
   protected Project project
 
+  /**
+   * If true, release via Artifactory
+   * @return
+   */
   abstract Property<Boolean> getUseArtifactory()
 
   abstract Property<String> getDeployRepoUrl()
@@ -19,6 +25,8 @@ abstract class MuxDistributionPluginExtension {
   abstract Property<Closure> getGroupIdStrategy()
 
   abstract Property<String> getVersionFieldInBuildConfig()
+
+  protected Action<MavenPom> pomFunction
 
   /**
    * A Closure with a single parameter of the type LibraryVariant. Users may add logic to generate artifactIds for
@@ -69,6 +77,10 @@ abstract class MuxDistributionPluginExtension {
     devVersionStrategy.set(closure)
   }
 
+  void pom(Action<MavenPom> closure) {
+    pomFunction = closure
+  }
+
   // Pre-made config options
 
   @SuppressWarnings('GrMethodMayBeStatic')
@@ -82,9 +94,7 @@ abstract class MuxDistributionPluginExtension {
    */
   @SuppressWarnings('GrMethodMayBeStatic')
   def releaseOnMainBranch() {
-    return { variant ->
-      ['main', 'master'].contains(Git.currentBranch()) && !variant.buildType.isDebuggable()
-    }
+    return { ['main', 'master'].contains(Git.currentBranch()) }
   }
 
   /**
