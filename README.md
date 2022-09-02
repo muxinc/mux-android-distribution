@@ -141,6 +141,21 @@ There are prebuilt strategies creating maven coordinates. They cover some common
 | devVersion, releaseVersion | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever    |
 | anything                   | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                     |
 
+## Using Artifactory
+
+This plugin supports artifactory distribution. You just need to supply your context URL, dev and release repo keys. If
+you only have a release repo, you can just put its Key in as a 'dev' repo key, and don't
+use `/.gradlew muxReleaseDeploy`.
+
+```groovy
+muxDistribution {
+  useArtifactory = true
+  artifactoryContextUrl = 'http://yourcompany.jfrog.io/artifactory'
+  artifactoryDevRepoKey = 'dev-repo'
+  artifactoryReleaseRepoKey = 'release-repo'
+}
+```
+
 ## Distributing Updates of this Plugin
 
 To distribute an update of this plugin, all you have to do is bump the plugin version in `build.gradle` then create a
