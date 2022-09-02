@@ -45,27 +45,27 @@ abstract class MuxDistributionPluginExtension {
 
   abstract Property<Closure> getPublishIf()
 
-  public void publishIf(Closure closure) {
+  void publishIf(Closure closure) {
     publishIf.set(closure)
   }
 
-  public void groupIds(Closure closure) {
+  void groupIds(Closure closure) {
     groupIdStrategy.set(closure)
   }
 
-  public void publicReleaseIf(Closure closure) {
+  void publicReleaseIf(Closure closure) {
     publicReleaseIf.set(closure)
   }
 
-  public void artifactIds(Closure closure) {
+  void artifactIds(Closure closure) {
     artifactIdStrategy.set(closure)
   }
 
-  public void releaseVersion(Closure closure) {
+  void releaseVersion(Closure closure) {
     releaseVersionStrategy.set(closure)
   }
 
-  public void devVersion(Closure closure) {
+  void devVersion(Closure closure) {
     devVersionStrategy.set(closure)
   }
 

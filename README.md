@@ -101,15 +101,15 @@ muxDistribution {
 
 There are prebuilt strategies creating maven coordinates. They cover some common cases, and you might find them useful.
 
-| Coordinate                  | Strategy                                         | Description                                                                                                                                                       |
-|-----------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| artifactId                  | `artifactFromProjectName`                        | generates an artifact ID from the name of the project/library module                                                                                              |
-| artifactId                  | `artifactFromFirstFlavor`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's first product flavor                                 |
-| artifactId                  | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then catenating the values of each flavor (in dimension order)                              |
-| artifactId                  | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.        |
-| devVersion, releaseVersion  | `versionFromHeadCommit`                          | generates a version name from the message of the HEAD commit of the current branch, looking for a token that looks like `v1.2.3` or something similarly-formatted |
-| devVersion, releaseVersion  | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever                             |
-| anything                    | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                     |
+| Coordinate                 | Strategy                                         | Description                                                                                                                                                       |
+|----------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| artifactId                 | `artifactFromProjectName`                        | generates an artifact ID from the name of the project/library module                                                                                              |
+| artifactId                 | `artifactFromFirstFlavor`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's first product flavor                                 |
+| artifactId                 | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then catenating the values of each flavor (in dimension order)                              |
+| artifactId                 | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.        |
+| devVersion, releaseVersion | `versionFromHeadCommit`                          | generates a version name from the message of the HEAD commit of the current branch, looking for a token that looks like `v1.2.3` or something similarly-formatted |
+| devVersion, releaseVersion | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever    |
+| anything                   | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                     |
 
 #### Using your own logic
 
