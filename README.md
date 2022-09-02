@@ -43,6 +43,14 @@ and `artifactId`s equal to the name and first product flavor.
 ```groovy
 muxDistribution {
   groupIds just("com.your.organization.or.site")
+  pom { 
+    developers {
+      developer {
+        name = "Your Name/Team"
+        email = "email@company.com"
+      }
+    }
+  }
 }
 ```
 
