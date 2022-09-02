@@ -26,6 +26,10 @@ abstract class MuxDistributionPluginExtension {
 
   abstract Property<String> getVersionFieldInBuildConfig()
 
+  abstract Property<Boolean> getPackageJavadocs()
+
+  abstract Property<Boolean> getPackageSources()
+
   protected Action<MavenPom> pomFunction
 
   /**

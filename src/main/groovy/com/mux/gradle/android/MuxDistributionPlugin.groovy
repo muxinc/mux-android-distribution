@@ -81,21 +81,35 @@ class MuxDistributionPlugin implements Plugin<Project> {
           def productFlavors = ext.productFlavors
           def buildTypes = ext.buildTypes
 
-          if (productFlavors != null) {
+          if (productFlavors != null && !productFlavors.isEmpty()) { // Declare publication variants for each variant
+            // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
             productFlavors.each {
               flavorContainer.addFlavor(it.dimension, it.name)
             }
-          }
+            def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
 
-          // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
-          def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
-          variantNames.each {
-            singleVariant(it) {
-              // TODO: Let users choose whether to do this
-              withSourcesJar()
-              withJavadocJar()
-            }
-          }
+            variantNames.each {
+              singleVariant(it) {
+                if (extension.packageSources.get() == true) {
+                  withSourcesJar()
+                }
+                if (extension.packageJavadocs.get() == true) {
+                  withJavadocJar()
+                }
+              } // singleVariant(it)
+            } // variantNames.each {
+          } else { // No flavors so just declare publication variants for by build types
+            buildTypes*.name.each {
+              singleVariant(it) {
+                if (extension.packageSources.get() == true) {
+                  withSourcesJar()
+                }
+                if (extension.packageJavadocs.get() == true) {
+                  withJavadocJar()
+                }
+              } // singleVariant(it)
+            } // buildTypes*.names.each {
+          } // else { // declare publication variants by build types
         }
       } // finalizeDsl
     } // project.androidComponents
@@ -220,7 +234,10 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.deployRepoUrl.convention('https://muxinc.jfrog.io/artifactory/default-maven-local')
     extension.artifactoryRepoKey.convention('default-maven-local')
     extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
+
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
+    extension.packageJavadocs.convention(true)
+    extension.packageSources.convention(true)
   }
 
   private ArtifactoryCredentials artifactoryCredentials() {

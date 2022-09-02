@@ -84,6 +84,8 @@ muxDistribution {
 
   publishIf { !it.productFlavors*.name.contains("ads") && it.buildType.name.contains("release") }
   useArtifactory = true
+  packageSources = true // warning: true by default
+  packageJavadocs = true // warning: true by default
 }
 ```
 
