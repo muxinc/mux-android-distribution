@@ -5,15 +5,15 @@ class Git {
     throw new IllegalAccessError("no instances of this class")
   }
 
-  public static String headCommitMessage() {
+  static String headCommitMessage() {
     return execGit("log", ["-1", "--pretty=%B"])
   }
 
-  public static String shortCommit() {
+  static String shortCommit() {
     return execGit("rev-parse", ["--short", "HEAD"])
   }
 
-  public static String currentBranch() {
+  static String currentBranch() {
     return execGit("branch", ["--show-current"])
   }
 

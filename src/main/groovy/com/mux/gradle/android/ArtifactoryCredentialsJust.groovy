@@ -2,10 +2,10 @@ package com.mux.gradle.android
 
 class ArtifactoryCredentialsJust implements ArtifactoryCredentials {
 
-  private String username;
-  private String password;
+  private String username
+  private String password
 
-  public ArtifactoryCredentialsJust(String username, String password) {
+  ArtifactoryCredentialsJust(String username, String password) {
     this.username = username
     this.password = password
   }

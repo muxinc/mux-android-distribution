@@ -6,9 +6,9 @@ class SelfFetchArtifactoryCredentials implements ArtifactoryCredentials {
   static final String USERNAME_KEY = 'artifactory_user'
   static final String PASSWORD_KEY = 'artifactory_password'
 
-  private Project project;
+  private Project project
 
-  public SelfFetchArtifactoryCredentials(Project project) {
+  SelfFetchArtifactoryCredentials(Project project) {
     this.project = project
   }
 
@@ -27,7 +27,7 @@ class SelfFetchArtifactoryCredentials implements ArtifactoryCredentials {
   }
 
   @Override
-  public String toString() {
+  String toString() {
     return "[username:${username()} , password:hidden]"
   }
 

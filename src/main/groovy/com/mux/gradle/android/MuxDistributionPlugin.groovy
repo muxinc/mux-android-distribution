@@ -54,7 +54,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
     project.repositories {
       maven {
-        url extension.deployRepoUrl.get()
+        url "${extension.artifactoryContextUrl.get()}/${extension.artifactoryDevRepoKey.get()}"
         credentials {
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
@@ -81,20 +81,35 @@ class MuxDistributionPlugin implements Plugin<Project> {
           def productFlavors = ext.productFlavors
           def buildTypes = ext.buildTypes
 
-          if (productFlavors != null) {
+          if (productFlavors != null && !productFlavors.isEmpty()) { // Declare publication variants for each variant
+            // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
             productFlavors.each {
               flavorContainer.addFlavor(it.dimension, it.name)
             }
-          }
+            def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
 
-          // Variants aren't built yet but this is our last chance to declare publication variants, so build the names
-          def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
-          variantNames.each {
-            singleVariant(it) {
-              withSourcesJar()
-              withJavadocJar()
-            }
-          }
+            variantNames.each {
+              singleVariant(it) {
+                if (extension.packageSources.get() == true) {
+                  withSourcesJar()
+                }
+                if (extension.packageJavadocs.get() == true) {
+                  withJavadocJar()
+                }
+              } // singleVariant(it)
+            } // variantNames.each {
+          } else { // No flavors so just declare publication variants for by build types
+            buildTypes*.name.each {
+              singleVariant(it) {
+                if (extension.packageSources.get() == true) {
+                  withSourcesJar()
+                }
+                if (extension.packageJavadocs.get() == true) {
+                  withJavadocJar()
+                }
+              } // singleVariant(it)
+            } // buildTypes*.names.each {
+          } // else { // declare publication variants by build types
         }
       } // finalizeDsl
     } // project.androidComponents
@@ -125,7 +140,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     return names
   }
 
-  @SuppressWarnings('GrUnresolvedAccess')
+  @SuppressWarnings(['GrUnresolvedAccess', 'GroovyAssignabilityCheck'])
   private void declarePublications() {
     project.afterEvaluate {
       project.android.libraryVariants.each { variant ->
@@ -135,7 +150,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
             artifactId deployArtifactId(variant)
             version deployVersion()
             groupId extension.groupIdStrategy.get().call(variant)
-            // TODO: configure the pom
+
+            // configure the pom from outside
+            if (extension.pomFunction != null) {
+              pom { extension.pomFunction.execute(it) }
+            }
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
@@ -149,16 +168,12 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For a "public release," do as above, then use the artifactory API to copy
     def artifactoryLogin = artifactoryCredentials()
     def ourContextUrl = extension.artifactoryContextUrl.get()
-    def ourRepoKey = extension.artifactoryRepoKey.get()
+    def devRepoKey = extension.artifactoryDevRepoKey.get()
     project.artifactory {
-      // TODO: External Configuration (if we expect this plugin to be used externally):
-      //  deployment repository: For more config, I dunno. Would be cool to make a dsl block that actually uses
-      //    RepositoryHandler. otherwise they can define whatever they want themselves
       contextUrl = ourContextUrl
       publish {
-        // TODO: Add defaults() for all publications this plugin made
         repository {
-          repoKey = ourRepoKey
+          repoKey = devRepoKey
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
         }
@@ -180,10 +195,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private void copyArtifactoryArtifacts(variant) {
-    // TODO: If we open source this probably let them customize the repos too
-    def devRepo = "default-maven-local"
-    def releaseRepo = "default-maven-release-local"
-    def base = "https://muxinc.jfrog.io/artifactory/api/copy"
+    def devRepo = extension.artifactoryDevRepoKey.get()
+    def releaseRepo = extension.artifactoryReleaseRepoKey.get()
+    def base = "${extension.artifactoryContextUrl.get()}/api/copy"
     def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
     def name = extension.artifactIdStrategy.get().call(variant)
     def version = extension.releaseVersionStrategy.get().call(variant)
@@ -212,10 +226,13 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.publishIf.convention(extension.publishIfReleaseBuild())
 
     extension.useArtifactory.convention(true)
-    extension.deployRepoUrl.convention('https://muxinc.jfrog.io/artifactory/default-maven-local')
-    extension.artifactoryRepoKey.convention('default-maven-local')
+    extension.artifactoryDevRepoKey.convention('default-maven-local')
+    extension.artifactoryReleaseRepoKey.convention("default-maven-release-local")
     extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
+
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
+    extension.packageJavadocs.convention(true)
+    extension.packageSources.convention(true)
   }
 
   private ArtifactoryCredentials artifactoryCredentials() {

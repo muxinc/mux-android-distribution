@@ -9,7 +9,7 @@ class BasicAuthenticator implements Authenticator {
   private String username
   private String password
 
-  public BasicAuthenticator(String username, String password) {
+  BasicAuthenticator(String username, String password) {
     this.username = username
     this.password = password
   }
