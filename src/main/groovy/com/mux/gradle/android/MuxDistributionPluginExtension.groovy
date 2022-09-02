@@ -16,9 +16,9 @@ abstract class MuxDistributionPluginExtension {
    */
   abstract Property<Boolean> getUseArtifactory()
 
-  abstract Property<String> getDeployRepoUrl()
+  abstract Property<String> getArtifactoryDevRepoKey()
 
-  abstract Property<String> getArtifactoryRepoKey()
+  abstract Property<String> getArtifactoryReleaseRepoKey()
 
   abstract Property<String> getArtifactoryContextUrl()
 

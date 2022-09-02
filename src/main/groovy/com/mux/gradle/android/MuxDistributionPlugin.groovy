@@ -54,7 +54,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
     project.repositories {
       maven {
-        url extension.deployRepoUrl.get()
+        url "${extension.artifactoryContextUrl.get()}/${extension.artifactoryDevRepoKey.get()}"
         credentials {
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
@@ -168,16 +168,12 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For a "public release," do as above, then use the artifactory API to copy
     def artifactoryLogin = artifactoryCredentials()
     def ourContextUrl = extension.artifactoryContextUrl.get()
-    def ourRepoKey = extension.artifactoryRepoKey.get()
+    def devRepoKey = extension.artifactoryDevRepoKey.get()
     project.artifactory {
-      // TODO: External Configuration (if we expect this plugin to be used externally):
-      //  deployment repository: For more config, I dunno. Would be cool to make a dsl block that actually uses
-      //    RepositoryHandler. otherwise they can define whatever they want themselves
       contextUrl = ourContextUrl
       publish {
-        // TODO: Add defaults() for all publications this plugin made
         repository {
-          repoKey = ourRepoKey
+          repoKey = devRepoKey
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
         }
@@ -199,10 +195,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private void copyArtifactoryArtifacts(variant) {
-    // TODO: If we open source this probably let them customize the repos too
-    def devRepo = "default-maven-local"
-    def releaseRepo = "default-maven-release-local"
-    def base = "https://muxinc.jfrog.io/artifactory/api/copy"
+    def devRepo = extension.artifactoryDevRepoKey.get()
+    def releaseRepo = extension.artifactoryReleaseRepoKey.get()
+    def base = "${extension.artifactoryContextUrl.get()}/api/copy"
     def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
     def name = extension.artifactIdStrategy.get().call(variant)
     def version = extension.releaseVersionStrategy.get().call(variant)
@@ -231,8 +226,8 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.publishIf.convention(extension.publishIfReleaseBuild())
 
     extension.useArtifactory.convention(true)
-    extension.deployRepoUrl.convention('https://muxinc.jfrog.io/artifactory/default-maven-local')
-    extension.artifactoryRepoKey.convention('default-maven-local')
+    extension.artifactoryDevRepoKey.convention('default-maven-local')
+    extension.artifactoryReleaseRepoKey.convention("default-maven-release-local")
     extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
