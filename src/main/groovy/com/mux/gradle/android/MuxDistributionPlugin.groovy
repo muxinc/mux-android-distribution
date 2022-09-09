@@ -65,6 +65,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
   @SuppressWarnings('GrUnresolvedAccess')
   private void addVersionName() {
+    // This doesn't add a "versionName" attribute to any android component/config, but it makes the calculated version
+    //  available for stuff downstream
+    project.version = deployVersion()
+
+    // Android libraries have no "version name" field, but libs sometimes want the version available at runtime
     project.androidComponents {
       finalizeDsl() { ext ->
         ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
