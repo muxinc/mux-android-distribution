@@ -37,8 +37,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     initConventions()
 
     declareRepository()
-    addVersionName()
-    declarePublicationVariants()
+    processVariants()
     declarePublications()
     if (useArtifactory()) {
       configureArtifactory()
@@ -64,7 +63,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
-  private void addVersionName() {
+  private void processVariants() {
     project.androidComponents {
       finalizeDsl() { ext ->
         // This doesn't add a "versionName" attribute to any android component/config, but it makes the calculated version
@@ -72,14 +71,8 @@ class MuxDistributionPlugin implements Plugin<Project> {
         project.version = deployVersion()
         // Android libraries have no "version name" field, but libs sometimes want the version available at runtime
         ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
-      }
-    }
-  }
 
-  @SuppressWarnings('GrUnresolvedAccess')
-  private void declarePublicationVariants() {
-    project.androidComponents {
-      finalizeDsl() { ext ->
+        // Declare Components for the libs we want to publish
         ext.publishing {
           def flavorContainer = new FlavorDimensionContainer()
           def productFlavors = ext.productFlavors
@@ -92,7 +85,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
             }
             def variantNames = variantNames(flavorContainer.asMap().values() as List, buildTypes)
 
-            variantNames.each {
+            variantNames.findAll { extension.publishIf.get().call(it) }.each {
               singleVariant(it) {
                 if (extension.packageSources.get() == true) {
                   withSourcesJar()
@@ -148,7 +141,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
   private void declarePublications() {
     project.afterEvaluate {
       project.android.libraryVariants.each { variant ->
-        if (extension.publishIf.get().call(variant)) {
+        if (extension.publishIf.get().call(variant.name)) {
           createdPublications += project.extensions.findByType(PublishingExtension).publications.create(variant.name, MavenPublication) { pub ->
             from project.components.findByName(variant.name)
             artifactId deployArtifactId(variant)
@@ -190,7 +183,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     project.tasks.create("muxReleaseDeploy") {
       doLast {
         project.android.libraryVariants.findAll {
-          extension.publishIf.get().call(it)
+          extension.publishIf.get().call(it.name)
         }.each {
           copyArtifactoryArtifacts(it)
         }
