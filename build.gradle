@@ -79,6 +79,8 @@ gradlePlugin {
       implementationClass = 'com.mux.gradle.android.MuxDistributionPlugin'
       // Why make it anything else?
       id = "$pluginGroupId.$pluginArtifactId"
+      displayName = "Mux Android Distribution Plugin"
+      description = "A plugin for publishing multi-variant Android libraries, with support for Artifactory"
     }
   }
 }
