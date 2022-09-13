@@ -171,8 +171,8 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  Build with buildkite pipeline, distribute 'release' builds to 'local' repo
     //  For a "public release," do as above, then use the artifactory API to copy
     def artifactoryLogin = artifactoryCredentials()
-    def ourContextUrl = extension.artifactoryContextUrl.get()
-    def devRepoKey = extension.artifactoryDevRepoKey.get()
+    def ourContextUrl = extension.artifactoryConfig.contextUrl
+    def devRepoKey = extension.artifactoryConfig.devRepoKey
     project.artifactory {
       contextUrl = ourContextUrl
       publish {
@@ -199,9 +199,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private void copyArtifactoryArtifacts(variant) {
-    def devRepo = extension.artifactoryDevRepoKey.get()
-    def releaseRepo = extension.artifactoryReleaseRepoKey.get()
-    def base = "${extension.artifactoryContextUrl.get()}/api/copy"
+    def devRepo = extension.artifactoryConfig.devRepoKey
+    def releaseRepo = extension.artifactoryConfig.releaseRepoKey
+    def base = "${extension.artifactoryConfig.contextUrl}/api/copy"
     def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
     def name = extension.artifactIdStrategy.get().call(variant)
     def version = extension.releaseVersionStrategy.get().call(variant)
