@@ -201,6 +201,6 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def publishIfReleaseBuild() {
-    return { variant -> !variant.buildType.isDebuggable() }
+    return { variant -> variant.contains('Release')}
   }
 }
