@@ -20,7 +20,7 @@ repositories {
 }
 
 // distribute the distribution plugin
-def pluginVersion = '0.4.3'
+def pluginVersion = '0.5.0'
 def pluginGroupId = 'com.mux.gradle.android'
 def pluginArtifactId = 'mux-android-distribution'
 def artifactoryCredential = { key ->
@@ -79,6 +79,8 @@ gradlePlugin {
       implementationClass = 'com.mux.gradle.android.MuxDistributionPlugin'
       // Why make it anything else?
       id = "$pluginGroupId.$pluginArtifactId"
+      displayName = "Mux Android Distribution Plugin"
+      description = "A plugin for publishing multi-variant Android libraries, with support for Artifactory"
     }
   }
 }

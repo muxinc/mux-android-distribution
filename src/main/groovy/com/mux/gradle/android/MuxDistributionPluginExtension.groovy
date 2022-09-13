@@ -16,21 +16,13 @@ abstract class MuxDistributionPluginExtension {
    */
   abstract Property<Boolean> getUseArtifactory()
 
-  abstract Property<String> getArtifactoryDevRepoKey()
-
-  abstract Property<String> getArtifactoryReleaseRepoKey()
-
-  abstract Property<String> getArtifactoryContextUrl()
-
-  abstract Property<Closure> getGroupIdStrategy()
-
   abstract Property<String> getVersionFieldInBuildConfig()
 
   abstract Property<Boolean> getPackageJavadocs()
 
   abstract Property<Boolean> getPackageSources()
 
-  protected Action<MavenPom> pomFunction
+  abstract Property<Closure> getGroupIdStrategy()
 
   /**
    * A Closure with a single parameter of the type LibraryVariant. Users may add logic to generate artifactIds for
@@ -56,6 +48,17 @@ abstract class MuxDistributionPluginExtension {
   abstract Property<Closure> getPublicReleaseIf()
 
   abstract Property<Closure> getPublishIf()
+
+  protected Action<MavenPom> pomFunction
+
+  protected ArtifactoryConfig artifactoryConfig = new ArtifactoryConfig()
+
+  ArtifactoryConfig artifactoryConfig(Action<ArtifactoryConfig> action) {
+    //noinspection GroovyAssignabilityCheck I do wish I could use kotlin
+    artifactoryConfig = project.configure(artifactoryConfig, {action})
+    useArtifactory.set(true)
+    return artifactoryConfig
+  }
 
   void publishIf(Closure closure) {
     publishIf.set(closure)

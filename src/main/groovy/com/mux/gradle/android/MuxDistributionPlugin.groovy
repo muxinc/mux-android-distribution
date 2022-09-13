@@ -54,7 +54,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
     project.repositories {
       maven {
-        url "${extension.artifactoryContextUrl.get()}/${extension.artifactoryDevRepoKey.get()}"
+        url "${extension.artifactoryConfig.contextUrl}/${extension.artifactoryConfig.devRepoKey}"
         credentials {
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
@@ -171,8 +171,8 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  Build with buildkite pipeline, distribute 'release' builds to 'local' repo
     //  For a "public release," do as above, then use the artifactory API to copy
     def artifactoryLogin = artifactoryCredentials()
-    def ourContextUrl = extension.artifactoryContextUrl.get()
-    def devRepoKey = extension.artifactoryDevRepoKey.get()
+    def ourContextUrl = extension.artifactoryConfig.contextUrl
+    def devRepoKey = extension.artifactoryConfig.devRepoKey
     project.artifactory {
       contextUrl = ourContextUrl
       publish {
@@ -199,9 +199,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private void copyArtifactoryArtifacts(variant) {
-    def devRepo = extension.artifactoryDevRepoKey.get()
-    def releaseRepo = extension.artifactoryReleaseRepoKey.get()
-    def base = "${extension.artifactoryContextUrl.get()}/api/copy"
+    def devRepo = extension.artifactoryConfig.devRepoKey
+    def releaseRepo = extension.artifactoryConfig.releaseRepoKey
+    def base = "${extension.artifactoryConfig.contextUrl}/api/copy"
     def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
     def name = extension.artifactIdStrategy.get().call(variant)
     def version = extension.releaseVersionStrategy.get().call(variant)
@@ -212,6 +212,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     if (!res.successful) {
       throw new PublishException("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
     }
+    project.logger.warn("MuxDistributionPlugin", "Copied $name from '$devRepo' -> to -> '$releaseRepo'")
   }
 
   private void initHttpClient() {
@@ -230,9 +231,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.publishIf.convention(extension.publishIfReleaseBuild())
 
     extension.useArtifactory.convention(true)
-    extension.artifactoryDevRepoKey.convention('default-maven-local')
-    extension.artifactoryReleaseRepoKey.convention("default-maven-release-local")
-    extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
+    extension.artifactoryConfig {
+      devRepoKey = 'default-maven-local'
+      releaseRepoKey = "default-maven-release-local"
+      contextUrl = "https://muxinc.jfrog.io/artifactory/"
+    }
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
     extension.packageJavadocs.convention(true)
@@ -240,8 +243,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private ArtifactoryCredentials artifactoryCredentials() {
-    // TODO: Based on some yet-to-make properties on the extension, override user/password
-    return new SelfFetchArtifactoryCredentials(project)
+    if (extension.artifactoryConfig.username != null && extension.artifactoryConfig.password != null) {
+      return new ArtifactoryCredentialsJust(extension.artifactoryConfig.username, extension.artifactoryConfig.password)
+    } else {
+      return new SelfFetchArtifactoryCredentials(project)
+    }
   }
 
   private boolean useArtifactory() {
