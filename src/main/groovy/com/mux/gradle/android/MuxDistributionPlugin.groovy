@@ -212,6 +212,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     if (!res.successful) {
       throw new PublishException("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
     }
+    project.logger.warn("MuxDistributionPlugin", "Copied $name from '$devRepo' -> to -> '$releaseRepo'")
   }
 
   private void initHttpClient() {
