@@ -30,8 +30,6 @@ abstract class MuxDistributionPluginExtension {
 
   abstract Property<Boolean> getPackageSources()
 
-  protected Action<MavenPom> pomFunction
-
   /**
    * A Closure with a single parameter of the type LibraryVariant. Users may add logic to generate artifactIds for
    * each variant of their library
@@ -56,6 +54,8 @@ abstract class MuxDistributionPluginExtension {
   abstract Property<Closure> getPublicReleaseIf()
 
   abstract Property<Closure> getPublishIf()
+
+  protected Action<MavenPom> pomFunction
 
   void publishIf(Closure closure) {
     publishIf.set(closure)
