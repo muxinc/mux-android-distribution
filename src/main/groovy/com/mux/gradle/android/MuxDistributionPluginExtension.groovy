@@ -57,6 +57,14 @@ abstract class MuxDistributionPluginExtension {
 
   protected Action<MavenPom> pomFunction
 
+  protected ArtifactoryConfig artifactoryConfig = new ArtifactoryConfig()
+
+  ArtifactoryConfig artifactoryConfig(Action<ArtifactoryConfig> action) {
+    //noinspection GroovyAssignabilityCheck I do wish I could use kotlin
+    artifactoryConfig = project.configure(artifactoryConfig, {action})
+    return artifactoryConfig
+  }
+
   void publishIf(Closure closure) {
     publishIf.set(closure)
   }
