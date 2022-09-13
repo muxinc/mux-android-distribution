@@ -231,9 +231,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.publishIf.convention(extension.publishIfReleaseBuild())
 
     extension.useArtifactory.convention(true)
-    extension.artifactoryDevRepoKey.convention('default-maven-local')
-    extension.artifactoryReleaseRepoKey.convention("default-maven-release-local")
-    extension.artifactoryContextUrl.convention("https://muxinc.jfrog.io/artifactory/")
+    extension.artifactoryConfig {
+      devRepoKey = 'default-maven-local'
+      releaseRepoKey = "default-maven-release-local"
+      contextUrl = "https://muxinc.jfrog.io/artifactory/"
+    }
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
     extension.packageJavadocs.convention(true)
@@ -241,8 +243,11 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   private ArtifactoryCredentials artifactoryCredentials() {
-    // TODO: Based on some yet-to-make properties on the extension, override user/password
-    return new SelfFetchArtifactoryCredentials(project)
+    if (extension.artifactoryConfig.username != null && extension.artifactoryConfig.password != null) {
+      return new ArtifactoryCredentialsJust(extension.artifactoryConfig.username, extension.artifactoryConfig.password)
+    } else {
+      return new SelfFetchArtifactoryCredentials(project)
+    }
   }
 
   private boolean useArtifactory() {
