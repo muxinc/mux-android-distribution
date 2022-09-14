@@ -196,7 +196,7 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def publishAllOfBuildTypes(List<String> buildTypes) {
-    return { variant -> buildTypes.contains(variant.buildType.name) }
+    return { variant -> buildTypes.findAll{ variant.containsIgnoreCase(it) }.size() > 0 }
   }
 
   @SuppressWarnings('GrMethodMayBeStatic')
