@@ -94,6 +94,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
                   withJavadocJar()
                 }
               } // singleVariant(it)
+              project.logger.quiet("mux: Created Component for: $it")
             } // variantNames.each {
           } else { // No flavors so just declare publication variants for by build types
             buildTypes*.name.each {
@@ -105,6 +106,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
                   withJavadocJar()
                 }
               } // singleVariant(it)
+              project.logger.quiet("mux: Created Component for: $it")
             } // buildTypes*.names.each {
           } // else { // declare publication variants by build types
         }
@@ -155,6 +157,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
+      project.logger.quiet( "mux: Created Publications: ${createdPublications*.name}")
     } // afterEvaluate
   }
 
@@ -205,7 +208,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     if (!res.successful) {
       throw new PublishException("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
     }
-    project.logger.warn("MuxDistributionPlugin", "Copied $name from '$devRepo' -> to -> '$releaseRepo'")
+    project.logger.lifecycle("mux: Copied $name from '$devRepo' -> to -> '$releaseRepo'")
   }
 
   private void initHttpClient() {
@@ -226,9 +229,10 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.useArtifactory.convention(true)
     extension.artifactoryConfig {
       devRepoKey = 'default-maven-local'
-      releaseRepoKey = "default-maven-release-local"
+      releaseRepoKey = 'default-maven-release-local'
       contextUrl = "https://muxinc.jfrog.io/artifactory/"
     }
+    extension.useArtifactory.set(false)
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
     extension.packageJavadocs.convention(true)

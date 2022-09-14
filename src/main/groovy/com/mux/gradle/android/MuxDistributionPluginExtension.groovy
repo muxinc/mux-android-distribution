@@ -55,7 +55,7 @@ abstract class MuxDistributionPluginExtension {
 
   ArtifactoryConfig artifactoryConfig(Action<ArtifactoryConfig> action) {
     //noinspection GroovyAssignabilityCheck I do wish I could use kotlin
-    artifactoryConfig = project.configure(artifactoryConfig, {action})
+    artifactoryConfig = project.configure(artifactoryConfig, { action(it) })
     useArtifactory.set(true)
     return artifactoryConfig
   }
@@ -196,11 +196,11 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def publishAllOfBuildTypes(List<String> buildTypes) {
-    return { variant -> buildTypes.contains(variant.buildType.name) }
+    return { variant -> buildTypes.findAll{ variant.containsIgnoreCase(it) }.size() > 0 }
   }
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def publishIfReleaseBuild() {
-    return { variant -> variant.contains('Release')}
+    return { variant -> variant.contains('Release') }
   }
 }

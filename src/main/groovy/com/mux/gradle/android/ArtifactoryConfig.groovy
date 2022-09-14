@@ -7,4 +7,15 @@ class ArtifactoryConfig {
   String contextUrl
   String devRepoKey
   String releaseRepoKey
+
+  @Override
+  String toString() {
+    return "ArtifactoryConfig{" +
+            "username='" + username + '\'' +
+            ", password='" + password + '\'' +
+            ", contextUrl='" + contextUrl + '\'' +
+            ", devRepoKey='" + devRepoKey + '\'' +
+            ", releaseRepoKey='" + releaseRepoKey + '\'' +
+            '}';
+  }
 }
