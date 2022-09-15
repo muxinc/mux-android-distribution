@@ -71,6 +71,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
         project.version = deployVersion()
         // Android libraries have no "version name" field, but libs sometimes want the version available at runtime
         ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
+        project.logger.quiet("mux: Adding project version: '${project.version}'")
 
         // Declare Components for the libs we want to publish
         ext.publishing {
@@ -94,7 +95,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
                   withJavadocJar()
                 }
               } // singleVariant(it)
-              project.logger.quiet("mux: Created Component for: $it")
+              project.logger.info("mux: Created Component for: $it")
             } // variantNames.each {
           } else { // No flavors so just declare publication variants for by build types
             buildTypes*.name.each {
@@ -106,7 +107,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
                   withJavadocJar()
                 }
               } // singleVariant(it)
-              project.logger.quiet("mux: Created Component for: $it")
+              project.logger.info("mux: Created Component for: $it")
             } // buildTypes*.names.each {
           } // else { // declare publication variants by build types
         }
@@ -157,7 +158,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
-      project.logger.quiet( "mux: Created Publications: ${createdPublications*.name}")
+      project.logger.lifecycle( "mux: Created Publications: ${createdPublications*.name}")
     } // afterEvaluate
   }
 
