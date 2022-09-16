@@ -71,7 +71,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
         project.version = deployVersion()
         // Android libraries have no "version name" field, but libs sometimes want the version available at runtime
         ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
-        project.logger.quiet("mux: Adding project version: '${project.version}'")
+        project.logger.lifecycle("mux: Adding project version: '${project.version}'")
 
         // Declare Components for the libs we want to publish
         ext.publishing {
@@ -158,7 +158,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
-      project.logger.lifecycle( "mux: Created Publications: ${createdPublications*.name}")
+      project.logger.info( "mux: Created Publications: ${createdPublications*.name}")
     } // afterEvaluate
   }
 
@@ -233,7 +233,6 @@ class MuxDistributionPlugin implements Plugin<Project> {
       releaseRepoKey = 'default-maven-release-local'
       contextUrl = "https://muxinc.jfrog.io/artifactory/"
     }
-    extension.useArtifactory.set(false)
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
     extension.packageJavadocs.convention(true)
