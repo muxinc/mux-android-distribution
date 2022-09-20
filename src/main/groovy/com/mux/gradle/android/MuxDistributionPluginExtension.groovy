@@ -42,9 +42,6 @@ abstract class MuxDistributionPluginExtension {
    */
   abstract Property<Closure> getDevVersionStrategy()
 
-  /**
-   * A closure that takes a LibraryVariant and should return true if the variant should be built for release
-   */
   abstract Property<Closure> getPublicReleaseIf()
 
   abstract Property<Closure> getPublishIf()

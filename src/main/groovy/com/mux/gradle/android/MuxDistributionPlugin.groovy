@@ -1,12 +1,12 @@
 package com.mux.gradle.android
 
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
-import org.gradle.api.artifacts.PublishException
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -158,7 +158,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
-      project.logger.info( "mux: Created Publications: ${createdPublications*.name}")
+      project.logger.info("mux: Created Publications: ${createdPublications*.name}")
     } // afterEvaluate
   }
 
@@ -198,24 +198,36 @@ class MuxDistributionPlugin implements Plugin<Project> {
   private void copyArtifactoryArtifacts(variant) {
     def devRepo = extension.artifactoryConfig.devRepoKey
     def releaseRepo = extension.artifactoryConfig.releaseRepoKey
-    def base = "${extension.artifactoryConfig.contextUrl}/api/copy"
+    def base = "${extension.artifactoryConfig.contextUrl}api/copy"
     def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
     def name = extension.artifactIdStrategy.get().call(variant)
     def version = extension.releaseVersionStrategy.get().call(variant)
 
     // Assemble all that and POST to the artifactory API to copy from our dev repo to our public one
-    def url = "$base/$devRepo/$repoPath/$name/$version?to=/$releaseRepo/$repoPath/$name/$version"
-    def res = httpClient.newCall(new Request.Builder().url(url).post(RequestBody.create("".getBytes("UTF-8"))).build()).execute()
+    project.logger.lifecycle("mux: Copying $name from '$devRepo' -> to -> '$releaseRepo'")
+    def artifactoryCreds = artifactoryCredentials()
+    def url = HttpUrl.parse("$base/$devRepo/$repoPath/$name/$version?to=/$releaseRepo/$repoPath/$name/$version")
+            .newBuilder()
+            .username(artifactoryCreds.username())
+            .password(artifactoryCreds.password())
+            .build()
+    def res = httpClient.newCall(
+            new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create("".getBytes("UTF-8")))
+                    .build()
+    ).execute()
     if (!res.successful) {
-      throw new PublishException("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
+      project.logger.warn("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
+    } else {
+      project.logger.lifecycle("mux: Copied $name from '$devRepo' -> to -> '$releaseRepo'")
     }
-    project.logger.lifecycle("mux: Copied $name from '$devRepo' -> to -> '$releaseRepo'")
   }
 
   private void initHttpClient() {
     def credentials = artifactoryCredentials()
     httpClient = new OkHttpClient.Builder()
-            .authenticator(new BasicAuthenticator(credentials.username(), credentials.password()))
+    //.authenticator(new BasicAuthenticator(credentials.username(), credentials.password()))
             .build()
   }
 
