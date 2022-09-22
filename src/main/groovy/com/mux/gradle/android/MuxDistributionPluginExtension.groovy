@@ -125,7 +125,7 @@ abstract class MuxDistributionPluginExtension {
   def versionFromHeadCommit(String prefix) {
     return {
       def headCommit = Git.headCommitMessage()
-      def matcher = headCommit =~ /v(\d+\.\d+\.\d+).*/
+      def matcher = headCommit =~ /.*v(\d+\.\d+\.\d+)/
       if (matcher.matches()) {
         return prefix + matcher.group(1)
       } else {

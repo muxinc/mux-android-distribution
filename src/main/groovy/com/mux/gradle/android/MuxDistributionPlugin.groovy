@@ -170,11 +170,13 @@ class MuxDistributionPlugin implements Plugin<Project> {
     def artifactoryLogin = artifactoryCredentials()
     def ourContextUrl = extension.artifactoryConfig.contextUrl
     def devRepoKey = extension.artifactoryConfig.devRepoKey
+    def releaseRepoKey = extension.artifactoryConfig.releaseRepoKey
+    def publicRelease = extension.publicReleaseIf.get().call()
     project.artifactory {
       contextUrl = ourContextUrl
       publish {
         repository {
-          repoKey = devRepoKey
+          repoKey = publicRelease ? releaseRepoKey : devRepoKey
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
         }
