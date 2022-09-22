@@ -42,9 +42,6 @@ abstract class MuxDistributionPluginExtension {
    */
   abstract Property<Closure> getDevVersionStrategy()
 
-  /**
-   * A closure that takes a LibraryVariant and should return true if the variant should be built for release
-   */
   abstract Property<Closure> getPublicReleaseIf()
 
   abstract Property<Closure> getPublishIf()
@@ -128,7 +125,7 @@ abstract class MuxDistributionPluginExtension {
   def versionFromHeadCommit(String prefix) {
     return {
       def headCommit = Git.headCommitMessage()
-      def matcher = headCommit =~ /v(\d+\.\d+\.\d+).*/
+      def matcher = headCommit =~ /.*v(\d+\.\d+\.\d+)/
       if (matcher.matches()) {
         return prefix + matcher.group(1)
       } else {
