@@ -146,12 +146,11 @@ There are prebuilt strategies creating maven coordinates. They cover some common
 This plugin supports artifactory distribution. You just need to supply your context URL, dev and release repo keys. This
 plugin will look for Artifactory login credentials in the following places: `local.properties` in the
 properties `artifactoryUser`/`artifactory_password`, and in the environment
-variables `ORG_GRADLE_PROJECT_artifactory_user` and `ORG_GRADLE_PROJECT_artifactory_password`
+variables `ORG_GRADLE_PROJECT_artifactory_user` and `ORG_GRADLE_PROJECT_artifactory_password`. You can also supply the
+credentials in the plugin DSL, but this is not recommended except for debugging purposes
 
-You can also supply the credentials in the plugin DSL, but this is not recommended except for debugging purposes
-
-If you only have a release repo, you can just put its Key in as a 'dev' repo key, and don't
-use `/.gradlew muxReleaseDeploy`.
+Artifactory provides only one task for publishing, so the destination repo depends on the `publicReleaseIf` function you
+provide to the plugin.
 
 ```groovy
 muxDistribution {
@@ -159,7 +158,7 @@ muxDistribution {
     // For quick debugging, you can put credentials here. Otherwise prefer local.properties 
     username = "xxx@yyy.com"
     password = "hunter2"
-    
+
     contextUrl = 'http://yourcompany.jfrog.io/artifactory'
     devRepoKey = 'dev-repo'
     releaseRepoKey = 'release-repo'
