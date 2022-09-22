@@ -1,12 +1,8 @@
 package com.mux.gradle.android
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
-import org.gradle.api.artifacts.PublishException
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -14,7 +10,6 @@ import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 
 class MuxDistributionPlugin implements Plugin<Project> {
 
-  private OkHttpClient httpClient = new OkHttpClient()
   private Project project
   private MuxDistributionPluginExtension extension
 
@@ -158,7 +153,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
           } // if(...)
         } // libraryVariants.each
       } // project.extensions...create()
-      project.logger.info( "mux: Created Publications: ${createdPublications*.name}")
+      project.logger.info("mux: Created Publications: ${createdPublications*.name}")
     } // afterEvaluate
   }
 
@@ -170,11 +165,13 @@ class MuxDistributionPlugin implements Plugin<Project> {
     def artifactoryLogin = artifactoryCredentials()
     def ourContextUrl = extension.artifactoryConfig.contextUrl
     def devRepoKey = extension.artifactoryConfig.devRepoKey
+    def releaseRepoKey = extension.artifactoryConfig.releaseRepoKey
+    def publicRelease = extension.publicReleaseIf.get().call()
     project.artifactory {
       contextUrl = ourContextUrl
       publish {
         repository {
-          repoKey = devRepoKey
+          repoKey = publicRelease ? releaseRepoKey : devRepoKey
           username = artifactoryLogin.username()
           password = artifactoryLogin.password()
         }
@@ -183,40 +180,6 @@ class MuxDistributionPlugin implements Plugin<Project> {
         }
       }
     }
-
-    project.tasks.create("muxReleaseDeploy") {
-      doLast {
-        project.android.libraryVariants.findAll {
-          extension.publishIf.get().call(it.name)
-        }.each {
-          copyArtifactoryArtifacts(it)
-        }
-      }
-    }
-  }
-
-  private void copyArtifactoryArtifacts(variant) {
-    def devRepo = extension.artifactoryConfig.devRepoKey
-    def releaseRepo = extension.artifactoryConfig.releaseRepoKey
-    def base = "${extension.artifactoryConfig.contextUrl}/api/copy"
-    def repoPath = (extension.groupIdStrategy.get().call(variant) as String).replaceAll(/\./, '/')
-    def name = extension.artifactIdStrategy.get().call(variant)
-    def version = extension.releaseVersionStrategy.get().call(variant)
-
-    // Assemble all that and POST to the artifactory API to copy from our dev repo to our public one
-    def url = "$base/$devRepo/$repoPath/$name/$version?to=/$releaseRepo/$repoPath/$name/$version"
-    def res = httpClient.newCall(new Request.Builder().url(url).post(RequestBody.create("".getBytes("UTF-8"))).build()).execute()
-    if (!res.successful) {
-      throw new PublishException("Couldn't publically release $name: HTTP ${res.code()} / ${res.message()}")
-    }
-    project.logger.lifecycle("mux: Copied $name from '$devRepo' -> to -> '$releaseRepo'")
-  }
-
-  private void initHttpClient() {
-    def credentials = artifactoryCredentials()
-    httpClient = new OkHttpClient.Builder()
-            .authenticator(new BasicAuthenticator(credentials.username(), credentials.password()))
-            .build()
   }
 
   private void initConventions() {
