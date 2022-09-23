@@ -73,20 +73,15 @@ For example, Here's the configuration we use for our ExoPlayer SDK:
 
 ```groovy
 muxDistribution {
-  def buildKite = System.getenv("BUILDKITE_BRANCH") != null
-  if (buildKite) {
-    devVersion versionFromCommitHash('dev-', System.getenv("BUILDKITE_BRANCH"))
-  } else {
-    devVersion versionFromCommitHash('dev-')
-  }
-  releaseVersion versionFromHeadCommit()
-  artifactIds artifactFromFlavorValue('api')
+  devVersion versionFromCommitHash('dev-')
+  releaseVersion versionFromTag()
+  artifactIds artifactFromFlavorValue('exoplayer')
   groupIds just("com.mux.stats.sdk.muxstats")
+  publicReleaseIf releaseOnTag()
 
-  publishIf { !it.productFlavors*.name.contains("ads") && it.buildType.name.contains("release") }
+  packageJavadocs = System.getenv("GITHUB_ACTIONS") != null
+  publishIf { it.containsIgnoreCase("release") }
   useArtifactory = true
-  packageSources = true // warning: true by default
-  packageJavadocs = true // warning: true by default
 }
 ```
 
@@ -135,10 +130,11 @@ There are prebuilt strategies creating maven coordinates. They cover some common
 |----------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | artifactId                 | `artifactFromProjectName`                        | generates an artifact ID from the name of the project/library module                                                                                              |
 | artifactId                 | `artifactFromFirstFlavor`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's first product flavor                                 |
-| artifactId                 | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then catenating the values of each flavor (in dimension order)                              |
+| artifactId                 | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then concatenating the values of each flavor (in dimension order)                              |
 | artifactId                 | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.        |
 | devVersion, releaseVersion | `versionFromHeadCommit`                          | generates a version name from the message of the HEAD commit of the current branch, looking for a token that looks like `v1.2.3` or something similarly-formatted |
 | devVersion, releaseVersion | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever    |
+| devVersion, releaseVersion | `versionFromTag`                                 | generates a version name from name of currently checked-out tag. If you're not exactly on a tag it's the distance (in commits) from the last tag                 |
 | anything                   | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                     |
 
 ## Using Artifactory
