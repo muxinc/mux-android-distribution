@@ -105,7 +105,12 @@ abstract class MuxDistributionPluginExtension {
    * Release all (non-filtered) variants if on the 'master' or 'main' branches, *and* the variant matches some predicate
    */
   def releaseOnMainBranchIf(Closure<Boolean> criteria) {
-    return { variant -> releaseOnMainBranch().call(variant) && criteria.call(variant) }
+    return { releaseOnMainBranch().call() && criteria.call() }
+  }
+
+  @SuppressWarnings('GrMethodMayBeStatic')
+  def releaseOnTag() {
+    return { !Git.currentTag().isEmpty() }
   }
 
   /**
@@ -193,7 +198,7 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def publishAllOfBuildTypes(List<String> buildTypes) {
-    return { variant -> buildTypes.findAll{ variant.containsIgnoreCase(it) }.size() > 0 }
+    return { variant -> buildTypes.findAll { variant.containsIgnoreCase(it) }.size() > 0 }
   }
 
   @SuppressWarnings('GrMethodMayBeStatic')

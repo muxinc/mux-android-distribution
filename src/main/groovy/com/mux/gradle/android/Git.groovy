@@ -17,6 +17,10 @@ class Git {
     return execGit("branch", ["--show-current"])
   }
 
+  static String currentTag() {
+    return execGit("describe", ["--tags"])
+  }
+
   private static String execGit(String gitCommand, List<String> argv) {
     def shellInput = ["git"] + gitCommand + (argv != null ? argv : [])
     return Runtime.getRuntime().exec(shellInput as String[]).inputStream.readLines().join("\n").trim()
