@@ -47,7 +47,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
     project.repositories {
       maven {
-        def repoKey = extension.publicReleaseIf.get().call()
+        def repoKey = extension.publicReleaseIf.get().call() ? extension.artifactoryConfig.releaseRepoKey : extension.artifactoryConfig.devRepoKey
         url "${extension.artifactoryConfig.contextUrl}/${repoKey}"
         credentials {
           username = artifactoryLogin.username()
