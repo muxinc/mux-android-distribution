@@ -110,7 +110,8 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def releaseOnTag() {
-    return { !Git.currentTag().isEmpty() }
+    // describe() returns a tag name on a tag(v1.2.3), or the distance to the nearest tag otherwise (v1.2.3-5-e4fc568a)
+    return { !(Git.describe() =~ /-\d+-......../).matches() }
   }
 
   /**

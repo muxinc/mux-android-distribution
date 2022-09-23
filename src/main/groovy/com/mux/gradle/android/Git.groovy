@@ -17,7 +17,7 @@ class Git {
     return execGit("branch", ["--show-current"])
   }
 
-  static String currentTag() {
+  static String describe() {
     return execGit("describe", ["--tags"])
   }
 
