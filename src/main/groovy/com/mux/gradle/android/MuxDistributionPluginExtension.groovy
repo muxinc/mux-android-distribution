@@ -116,7 +116,16 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def versionFromTag() {
-    return { Git.describe() }
+    return {
+      def tagName = Git.describe()
+      def versionMatcher = tagName =~ /v(\d+\.\d+\.\d+)/
+      versionMatcher.find()
+      if(versionMatcher.matches()) {
+        return versionMatcher.group(1)
+      } else {
+        return tagName
+      }
+    }
   }
 
   /**
@@ -137,6 +146,7 @@ abstract class MuxDistributionPluginExtension {
     return {
       def headCommit = Git.headCommitMessage()
       def matcher = headCommit =~ /.*v(\d+\.\d+\.\d+)/
+      matcher.find()
       if (matcher.matches()) {
         return prefix + matcher.group(1)
       } else {
