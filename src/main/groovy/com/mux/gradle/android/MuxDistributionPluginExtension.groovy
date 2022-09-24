@@ -9,6 +9,7 @@ import org.gradle.api.publish.maven.MavenPom
 abstract class MuxDistributionPluginExtension {
 
   protected Project project
+protected MuxDistributionPlugin plugin
 
   /**
    * If true, release via Artifactory
@@ -54,6 +55,7 @@ abstract class MuxDistributionPluginExtension {
     //noinspection GroovyAssignabilityCheck I do wish I could use kotlin
     artifactoryConfig = project.configure(artifactoryConfig, { action(it) })
     useArtifactory.set(true)
+    plugin.configureArtifactory()
     return artifactoryConfig
   }
 

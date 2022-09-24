@@ -22,6 +22,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     this.project = project
     extension = project.extensions.create("muxDistribution", MuxDistributionPluginExtension)
     extension.project = project
+    extension.plugin = this
 
     // We need depend on a couple of other plugins
     project.plugins.apply("maven-publish")
@@ -30,12 +31,8 @@ class MuxDistributionPlugin implements Plugin<Project> {
     checkAndroidInstalled()
     initConventions()
 
-    declareRepository()
     processVariants()
     declarePublications()
-    if (useArtifactory()) {
-      configureArtifactory()
-    }
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
@@ -158,7 +155,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
-  private void configureArtifactory() {
+  void configureArtifactory() {
+    declareRepository()
+
     // Our projects' deployment strategy:
     //  Build with buildkite pipeline, distribute 'release' builds to 'local' repo
     //  For a "public release," do as above, then use the artifactory API to copy
@@ -191,11 +190,9 @@ class MuxDistributionPlugin implements Plugin<Project> {
     extension.publishIf.convention(extension.publishIfReleaseBuild())
 
     extension.useArtifactory.convention(true)
-    extension.artifactoryConfig {
-      devRepoKey = 'default-maven-local'
-      releaseRepoKey = 'default-maven-release-local'
-      contextUrl = "https://muxinc.jfrog.io/artifactory/"
-    }
+    extension.artifactoryConfig.devRepoKey = 'NOT_CONFIGURED'
+    extension.artifactoryConfig.releaseRepoKey = 'NOT_CONFIGURED'
+    extension.artifactoryConfig.contextUrl = 'NOT_CONFIGURED'
 
     extension.versionFieldInBuildConfig.convention("LIB_VERSION")
     extension.packageJavadocs.convention(true)
