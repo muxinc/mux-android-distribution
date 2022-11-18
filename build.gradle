@@ -20,7 +20,7 @@ repositories {
 }
 
 // distribute the distribution plugin
-def pluginVersion = '1.0.2'
+def pluginVersion = '1.0.3'
 def pluginGroupId = 'com.mux.gradle.android'
 def pluginArtifactId = 'mux-android-distribution'
 def artifactoryCredential = { key ->
