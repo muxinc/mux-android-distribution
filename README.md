@@ -44,6 +44,8 @@ and `artifactId`s equal to the name and first product flavor.
 ```groovy
 muxDistribution {
   groupIds just("com.your.organization.or.site")
+  publishIf { true }
+  publicReleaseIf { true }
   pom {
     developers {
       developer {
@@ -69,7 +71,7 @@ $ ./gradlew artifactoryPublish
 The plugin is very configurable. Artifact IDs, Group IDs, and Versions can be generated on a per-variant basis. There
 are a few built-in strategies for generating each, and you can also write your own.
 
-For example, Here's the configuration we use for our ExoPlayer SDK:
+For example, Here's the configuration we use for our Data SDK for ExoPlayer:
 
 ```groovy
 muxDistribution {
@@ -79,9 +81,13 @@ muxDistribution {
   groupIds just("com.mux.stats.sdk.muxstats")
   publicReleaseIf releaseOnTag()
 
-  packageJavadocs = System.getenv("GITHUB_ACTIONS") != null
+  packageJavadocs = releaseOnTag().call()
   publishIf { it.containsIgnoreCase("release") }
-  useArtifactory = true
+  artifactoryConfig {
+    contextUrl = "https://muxinc.jfrog.io/artifactory/"
+    releaseRepoKey = 'default-maven-release-local'
+    devRepoKey = 'default-maven-local'
+  }
 }
 ```
 
@@ -116,7 +122,7 @@ muxDistribution {
   // Release builds should all have the same version name: 1.0.1
   releaseVersion = just("1.0.1")
   // Dev builds should also include the CI build number if available
-  devVersion { variant -> "1.0.1-dev-${System.getenv("BUILD_NUMBER")}" }
+  devVersion { "1.0.1-dev-${System.getenv("BUILD_NUMBER")}" }
   // GroupId should be variant-sensitive
   groupIds { it.contains("whiteLabelA") ? "com.companyA.library.android" : "com.own.company.library.android" }
 }
@@ -126,16 +132,16 @@ muxDistribution {
 
 There are prebuilt strategies creating maven coordinates. They cover some common cases, and you might find them useful.
 
-| Coordinate                 | Strategy                                         | Description                                                                                                                                                                                     |
-|----------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| artifactId                 | `artifactFromProjectName`                        | generates an artifact ID from the name of the project/library module                                                                                                                            |
-| artifactId                 | `artifactFromFirstFlavor`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's first product flavor                                                               |
-| artifactId                 | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then concatenating the values of each flavor (in dimension order)                                                         |
-| artifactId                 | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.                                      |
+| Coordinate                           | Strategy                                         | Description                                                                                                                                                                                     |
+|--------------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| artifactId                           | `artifactFromProjectName`                        | generates an artifact ID from the name of the project/library module                                                                                                                            |
+| artifactId                           | `artifactFromFirstFlavor`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's first product flavor                                                               |
+| artifactId                           | `artifactFromAllFlavors`                         | generates an artifact ID from the name of the project/library module, then concatenating the values of each flavor (in dimension order)                                                         |
+| artifactId                           | `artifactFromFlavorValue`                        | generates an artifact ID from the name of the project/library module, then adding the value of the variant's product flavor with the given dimension name.                                      |
 | version (devVersion, releaseVersion) | `versionFromHeadCommit`                          | generates a version name from the message of the HEAD commit of the current branch, looking for a token that looks like `v1.2.3` or something similarly-formatted                               |
 | version (devVersion, releaseVersion) | `versionFromCommitHash(@Nullable String prefix)` | generates a version name from the hash of the current HEAD commit, and the name of the branch. You can supply a prefix, like `'dev-'` or `'beta-'` or whatever                                  |
 | version (devVersion, releaseVersion) | `versionFromTag`                                 | generates a version name from name of currently checked-out tag, or the most recent tag on your branch. If the name starts with something like `v1.2.3` the `1.2.3` will be pulled out and used | 
-| anything                   | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                                                   |
+| anything                             | `just(String)`                                   | Sets every variant's coordinate to the same supplied value. Can be used for any of: `groupIds`, `artifactIds`, `releaseVersion`, `devVersion`                                                   |
 
 ## Using Artifactory
 
