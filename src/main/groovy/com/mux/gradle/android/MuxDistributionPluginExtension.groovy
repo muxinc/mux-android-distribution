@@ -49,7 +49,8 @@ abstract class MuxDistributionPluginExtension {
 
   protected Action<MavenPom> pomFunction
 
-  protected DokkaPublishingConfig dokkaPublishingConfig = null
+  protected DokkaPublishingConfig dokkaPublishingConfig = new DokkaPublishingConfig()
+  protected boolean useDokka = false
 
   protected ArtifactoryConfig artifactoryConfig = new ArtifactoryConfig()
 
@@ -62,8 +63,11 @@ abstract class MuxDistributionPluginExtension {
   }
 
   DokkaPublishingConfig dokkaConfig(Action<DokkaPublishingConfig> action) {
+    System.out.println(">>> Called dokkaConfig")
     //noinspection GroovyAssignabilityCheck
     dokkaPublishingConfig = project.configure(dokkaPublishingConfig, { action(it) })
+    useDokka = true
+    plugin.declareDokkaIfConfigured()
     return dokkaPublishingConfig
   }
 
