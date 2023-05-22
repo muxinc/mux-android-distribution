@@ -6,6 +6,9 @@ import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.jetbrains.dokka.gradle.DokkaPlugin
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 
 class MuxDistributionPlugin implements Plugin<Project> {
@@ -32,7 +35,56 @@ class MuxDistributionPlugin implements Plugin<Project> {
     initConventions()
 
     processVariants()
+    declareDokkaIfConfigured()
     declarePublications()
+  }
+
+  @SuppressWarnings('GrUnresolvedAccess')
+  private void declareDokkaIfConfigured() {
+    def dokkaConfig = extension.dokkaPublishingConfig
+    if (dokkaConfig == null) {
+      return
+    } else {
+      project.plugins.apply(DokkaPlugin.class)
+    }
+
+    def moduleTitle = dokkaConfig.moduleName != null ? dokkaConfig.moduleName : project.name
+    def footer = dokkaConfig.footer != null ? dokkaConfig.footer : ""
+
+    if (dokkaConfig.multiProject) {
+      project.subprojects { Project project ->
+        configureDokkaTasks(project)
+      }
+    } else {
+      configureDokkaTasks(project, moduleTitle, footer)
+    }
+  }
+
+  @SuppressWarnings('GrUnresolvedAccess')
+  private void configureDokkaTasks(Project project, String title, String footer) {
+    project.tasks.withType(DokkaTask.class) {
+      dokkaSourceSets.configureEach {
+        documentedVisibilities.set([Visibility.PUBLIC, Visibility.PROTECTED])
+        moduleName.set(title)
+
+        String dokkaBaseConfiguration = """
+        {
+          "customAssets": ["${project.file("logo-icon.svg")}"],
+          "footerMessage": "$footer"
+        }
+        """
+        pluginsMapConfiguration.set(["org.jetbrains.dokka.base.DokkaBase": dokkaBaseConfiguration])
+
+        if (project.file("Module.md").exists()) {
+          includes.from(project.file("Module.md"))
+        }
+
+        perPackageOption {
+          matchingRegex.set(".*internal.*")
+          suppress.set(true)
+        }
+      }
+    }
   }
 
   @SuppressWarnings('GrUnresolvedAccess')

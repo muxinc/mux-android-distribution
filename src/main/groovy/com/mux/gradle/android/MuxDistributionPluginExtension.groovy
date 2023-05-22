@@ -9,7 +9,7 @@ import org.gradle.api.publish.maven.MavenPom
 abstract class MuxDistributionPluginExtension {
 
   protected Project project
-protected MuxDistributionPlugin plugin
+  protected MuxDistributionPlugin plugin
 
   /**
    * If true, release via Artifactory
@@ -49,6 +49,8 @@ protected MuxDistributionPlugin plugin
 
   protected Action<MavenPom> pomFunction
 
+  protected DokkaPublishingConfig dokkaPublishingConfig = null
+
   protected ArtifactoryConfig artifactoryConfig = new ArtifactoryConfig()
 
   ArtifactoryConfig artifactoryConfig(Action<ArtifactoryConfig> action) {
@@ -57,6 +59,12 @@ protected MuxDistributionPlugin plugin
     useArtifactory.set(true)
     plugin.configureArtifactory()
     return artifactoryConfig
+  }
+
+  DokkaPublishingConfig dokkaConfig(Action<DokkaPublishingConfig> action) {
+    //noinspection GroovyAssignabilityCheck
+    dokkaPublishingConfig = project.configure(dokkaPublishingConfig, { action(it) })
+    return dokkaPublishingConfig
   }
 
   void publishIf(Closure closure) {
@@ -122,7 +130,7 @@ protected MuxDistributionPlugin plugin
       def tagName = Git.describe()
       def versionMatcher = tagName =~ /v(\d+\.\d+\.\d+)/
       versionMatcher.find()
-      if(versionMatcher.matches()) {
+      if (versionMatcher.matches()) {
         return versionMatcher.group(1)
       } else {
         return tagName
