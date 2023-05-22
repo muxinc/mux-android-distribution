@@ -18,11 +18,10 @@ repositories {
   gradlePluginPortal()
   mavenCentral()
   google()
-  //jcenter()
 }
 
 // distribute the distribution plugin
-def pluginVersion = '1.1.0-dev'
+def pluginVersion = '1.1.0'
 def pluginGroupId = 'com.mux.gradle.android'
 def pluginArtifactId = 'mux-android-distribution'
 def artifactoryCredential = { key ->

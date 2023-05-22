@@ -85,7 +85,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
       }
     }
   }
-  
+
   @SuppressWarnings('GrUnresolvedAccess')
   private void processVariants() {
     project.androidComponents {
