@@ -85,26 +85,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
       }
     }
   }
-
-  @SuppressWarnings('GrUnresolvedAccess')
-  private void declareRepository() {
-    def artifactoryLogin = artifactoryCredentials()
-    // TODO: In Android's new project setup, repositories are supposed to be in settings.gradle/a settings plugin
-    //  To accommodate this, we'd need to declare another Plugin with the <Settings> type param, that can call
-    //  settings.repositoryManagement {... }
-    //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
-    project.repositories {
-      maven {
-        def repoKey = extension.publicReleaseIf.get().call() ? extension.artifactoryConfig.releaseRepoKey : extension.artifactoryConfig.devRepoKey
-        url "${extension.artifactoryConfig.contextUrl}/${repoKey}"
-        credentials {
-          username = artifactoryLogin.username()
-          password = artifactoryLogin.password()
-        }
-      }
-    }
-  }
-
+  
   @SuppressWarnings('GrUnresolvedAccess')
   private void processVariants() {
     project.androidComponents {
@@ -207,8 +188,6 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
   @SuppressWarnings('GrUnresolvedAccess')
   void configureArtifactory() {
-    declareRepository()
-
     // Our projects' deployment strategy:
     //  Build with buildkite pipeline, distribute 'release' builds to 'local' repo
     //  For a "public release," do as above, then use the artifactory API to copy
