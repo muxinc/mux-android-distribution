@@ -40,12 +40,10 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
   @SuppressWarnings('GrUnresolvedAccess')
   void declareDokkaIfConfigured() {
-    System.out.println(">>> Dokka Config " + extension.dokkaPublishingConfig)
     if (!extension.useDokka) {
       return
     } else {
       project.plugins.apply(DokkaPlugin.class)
-      System.out.println(">>> Applied dokka plugin")
     }
 
     DokkaPublishingConfig dokkaConfig = extension.dokkaPublishingConfig
@@ -53,12 +51,10 @@ class MuxDistributionPlugin implements Plugin<Project> {
     def footer = dokkaConfig.footer != null ? dokkaConfig.footer : ""
 
     if (dokkaConfig.multiProject) {
-      System.out.println(">>> Multiproject")
       project.subprojects { Project project ->
         configureDokkaTasks(project)
       }
     } else {
-      System.out.println(">>> single-project: " + project.name)
       configureDokkaTasks(project, moduleTitle, footer)
     }
   }

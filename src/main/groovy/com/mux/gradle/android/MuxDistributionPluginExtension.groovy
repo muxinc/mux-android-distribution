@@ -63,7 +63,6 @@ abstract class MuxDistributionPluginExtension {
   }
 
   DokkaPublishingConfig dokkaConfig(Action<DokkaPublishingConfig> action) {
-    System.out.println(">>> Called dokkaConfig")
     //noinspection GroovyAssignabilityCheck
     dokkaPublishingConfig = project.configure(dokkaPublishingConfig, { action(it) })
     useDokka = true
