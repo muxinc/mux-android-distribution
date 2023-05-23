@@ -22,7 +22,7 @@ buildscript {
     maven { url 'https://muxinc.jfrog.io/artifactory/default-maven-local' }
   }
   dependencies {
-    classpath 'com.mux.gradle.android:mux-android-distribution:0.1.1'
+    classpath 'com.mux.gradle.android:mux-android-distribution:1.1.0'
   }
 }
 ```
