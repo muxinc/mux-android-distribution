@@ -6,6 +6,9 @@ import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.jetbrains.dokka.gradle.DokkaPlugin
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 
 class MuxDistributionPlugin implements Plugin<Project> {
@@ -36,19 +39,41 @@ class MuxDistributionPlugin implements Plugin<Project> {
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
-  private void declareRepository() {
-    def artifactoryLogin = artifactoryCredentials()
-    // TODO: In Android's new project setup, repositories are supposed to be in settings.gradle/a settings plugin
-    //  To accommodate this, we'd need to declare another Plugin with the <Settings> type param, that can call
-    //  settings.repositoryManagement {... }
-    //  For now, users of this plugin can do repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS) to work around this
-    project.repositories {
-      maven {
-        def repoKey = extension.publicReleaseIf.get().call() ? extension.artifactoryConfig.releaseRepoKey : extension.artifactoryConfig.devRepoKey
-        url "${extension.artifactoryConfig.contextUrl}/${repoKey}"
-        credentials {
-          username = artifactoryLogin.username()
-          password = artifactoryLogin.password()
+  void declareDokkaIfConfigured() {
+    if (!extension.useDokka) {
+      return
+    } else {
+      project.plugins.apply(DokkaPlugin.class)
+    }
+
+    DokkaPublishingConfig dokkaConfig = extension.dokkaPublishingConfig
+    def moduleTitle = dokkaConfig.moduleName != null ? dokkaConfig.moduleName : project.name
+    def footer = dokkaConfig.footer != null ? dokkaConfig.footer : ""
+    configureDokkaTasks(project, moduleTitle, footer)
+  }
+
+  @SuppressWarnings('GrUnresolvedAccess')
+  private void configureDokkaTasks(Project project, String title, String footer) {
+    project.tasks.withType(DokkaTask.class) {
+      dokkaSourceSets.configureEach {
+        documentedVisibilities.set([Visibility.PUBLIC, Visibility.PROTECTED])
+        moduleName.set(title)
+
+        String dokkaBaseConfiguration = """
+        {
+          "customAssets": ["${project.file("logo-icon.svg")}"],
+          "footerMessage": "$footer"
+        }
+        """
+        pluginsMapConfiguration.set(["org.jetbrains.dokka.base.DokkaBase": dokkaBaseConfiguration])
+
+        if (project.file("Module.md").exists()) {
+          includes.from(project.file("Module.md"))
+        }
+
+        perPackageOption {
+          matchingRegex.set(".*internal.*")
+          suppress.set(true)
         }
       }
     }
@@ -156,8 +181,6 @@ class MuxDistributionPlugin implements Plugin<Project> {
 
   @SuppressWarnings('GrUnresolvedAccess')
   void configureArtifactory() {
-    declareRepository()
-
     // Our projects' deployment strategy:
     //  Build with buildkite pipeline, distribute 'release' builds to 'local' repo
     //  For a "public release," do as above, then use the artifactory API to copy
