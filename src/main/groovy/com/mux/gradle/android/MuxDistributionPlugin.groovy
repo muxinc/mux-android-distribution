@@ -49,14 +49,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
     DokkaPublishingConfig dokkaConfig = extension.dokkaPublishingConfig
     def moduleTitle = dokkaConfig.moduleName != null ? dokkaConfig.moduleName : project.name
     def footer = dokkaConfig.footer != null ? dokkaConfig.footer : ""
-
-    if (dokkaConfig.multiProject) {
-      project.subprojects { Project project ->
-        configureDokkaTasks(project)
-      }
-    } else {
-      configureDokkaTasks(project, moduleTitle, footer)
-    }
+    configureDokkaTasks(project, moduleTitle, footer)
   }
 
   @SuppressWarnings('GrUnresolvedAccess')
