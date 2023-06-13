@@ -87,6 +87,7 @@ class MuxDistributionPlugin implements Plugin<Project> {
         //  available for stuff downstream
         project.version = deployVersion()
         // Android libraries have no "version name" field, but libs sometimes want the version available at runtime
+        ext.buildFeatures.buildConfig = true
         ext.defaultConfig.buildConfigField 'String', extension.versionFieldInBuildConfig.get(), /"${deployVersion()}"/
         project.logger.lifecycle("mux: Adding project version: '${project.version}'")
 
