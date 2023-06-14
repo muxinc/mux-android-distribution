@@ -176,7 +176,8 @@ abstract class MuxDistributionPluginExtension {
 
   @SuppressWarnings('GrMethodMayBeStatic')
   def versionFromCommitHash(String prefix) {
-    return { prefix + "${Git.currentBranch()}-${Git.shortCommit()}" }
+    String safeBranchName = Git.currentBranch().replace('/', '-')
+    return { prefix + "${safeBranchName}-${Git.shortCommit()}" }
   }
 
   @SuppressWarnings('GrMethodMayBeStatic')
