@@ -3,51 +3,63 @@
  */
 package mux.artifactory
 
-import java.io.File
-import kotlin.test.assertTrue
-import kotlin.test.Test
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * A simple functional test for the 'mux.artifactory.greeting' plugin.
  */
 class MuxArtifactoryPluginFunctionalTest {
 
-    @field:TempDir
-    lateinit var projectDir: File
+  @field:TempDir
+  lateinit var projectDir: File
 
-    private val buildFile by lazy { projectDir.resolve("build.gradle") }
-    private val settingsFile by lazy { projectDir.resolve("settings.gradle") }
-    private val propsFile by lazy { projectDir.resolve("local.properties") }
+  private val buildFile by lazy { projectDir.resolve("build.gradle") }
+  private val settingsFile by lazy { projectDir.resolve("settings.gradle") }
+  private val propsFile by lazy { projectDir.resolve("local.properties") }
 
-    @Test fun `can run task`() {
-        // Set up the test build
-        settingsFile.writeText("")
-        buildFile.writeText("""
+  @Test
+  fun `can run task`() {
+    // Set up the test build
+    buildFile.writeText(
+      """
             plugins {
                 id('com.mux.gradle.artifactory')
             }
             
+            repositories {
+              maven { url 'https://muxinc.jfrog.io/artifactory/default-maven-local' }
+            }
+            
             muxArtifactory {
               contextUrl = "https://muxinc.jfrog.io/artifactory/"
-              releaseRepoKey = 'default-maven-release-local'
+              releaseRepoKey = 'default-maven-local'
               devRepoKey = 'default-maven-local'
               publishToProdIf { false }
             }
             
-        """.trimIndent())
+        """.trimIndent()
+    )
+    val realPropertiesFile = File("../../local.properties")
+    val propsContent = realPropertiesFile.reader().readLines().joinToString(separator = "\n")
+    println("... props file $propsContent")
+    propsFile.writeText(propsContent)
 
-        // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("artifactoryPublish")
-        runner.withProjectDir(projectDir)
-        // NOTE!! Doesn't really pass. Can't give real values to artifactory to test, fails with 401
-        val result = runner.build()
+    println("Im in dir ${System.getProperty("user.dir")}")
 
-        // Verify the result
-        assertTrue(result.output.contains("Hello from plugin 'mux.artifactory.greeting'"))
-    }
+    // Run the build
+    val runner = GradleRunner.create()
+    runner.forwardOutput()
+    runner.withPluginClasspath()
+    runner.withArguments("artifactoryPublish")
+    runner.withProjectDir(projectDir)
+    // NOTE!! Doesn't really pass. Creds seem right which is odd
+    val result = runner.build()
+
+    // Verify the result
+    assertTrue(result.output.contains("Hello from plugin 'mux.artifactory.greeting'"))
+  }
 }
