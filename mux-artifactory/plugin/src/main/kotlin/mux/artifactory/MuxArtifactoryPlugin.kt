@@ -7,15 +7,18 @@ import org.gradle.api.Project
 import org.gradle.api.Plugin
 
 /**
- * A simple 'hello world' plugin.
+ * A plugin
  */
 class MuxArtifactoryPlugin: Plugin<Project> {
+
+    private lateinit var extension: MuxArtifactoryPluginExtension
+    private lateinit var project: Project
+
     override fun apply(project: Project) {
-        // Register a task
-        project.tasks.register("greeting") { task ->
-            task.doLast {
-                println("Hello from plugin 'mux.artifactory.greeting'")
-            }
-        }
+      this.project = project
+      this.extension = project.extensions.create("muxArtifactory", MuxArtifactoryPluginExtension::class.java)
+
+      // TODO: must configure artifactory after all apply()s
+      // TODO:
     }
 }
