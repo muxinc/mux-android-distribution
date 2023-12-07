@@ -11,7 +11,7 @@ object GitBasedVersion {
    * The pattern used for matching the names of release tags
    */
   @Suppress("MemberVisibilityCanBePrivate")
-  val VERSION_TAG_NAME_PATTERN: Pattern = Pattern.compile("""^(v\d+\.\d+\.\d+)$""")
+  val VERSION_TAG_NAME_PATTERN: Pattern = Pattern.compile("""^v(\d+\.\d+\.\d+)$""")
 
   /**
    * Returns true if the Git working tree is currently detached from a branch, but pointing

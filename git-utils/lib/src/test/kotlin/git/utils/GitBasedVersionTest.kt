@@ -69,4 +69,32 @@ class GitBasedVersionTest {
       "Generated version name should be $expectedVersionName"
     )
   }
+
+  @Test
+  fun `versionNameFromTag when NOT on a properly-formatted tag`() {
+    mockkObject(Git)
+    every { Git.describe() } returns "v1.2.3-g769fe52"
+
+    val versionName = GitBasedVersion.versionNameFromTag()
+    val expectedVersionName = "v1.2.3-g769fe52"
+    assertEquals(
+      versionName,
+      expectedVersionName,
+      "Generated version name should be $expectedVersionName"
+    )
+  }
+
+  @Test
+  fun `versionNameFromTag when on a properly-formatted tag`() {
+    mockkObject(Git)
+    every { Git.describe() } returns "v1.2.3"
+
+    val versionName = GitBasedVersion.versionNameFromTag()
+    val expectedVersionName = "1.2.3"
+    assertEquals(
+      versionName,
+      expectedVersionName,
+      "Generated version name should be $expectedVersionName"
+    )
+  }
 }
