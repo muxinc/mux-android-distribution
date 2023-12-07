@@ -30,13 +30,7 @@ class MuxArtifactoryPlugin: Plugin<Project> {
       this.extension = project.extensions.create("muxArtifactory", MuxArtifactoryPluginExtension::class.java)
       this.extension.plugin = this
       this.extension.project = project
-      val plugin = project.plugins.apply(ArtifactoryPlugin::class.java)
-//      project.plugins.apply<ArtifactoryPlugin::class.java>() {
-//
-//      }
-
-      val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
-        ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
+      project.plugins.apply(ArtifactoryPlugin::class.java)
 
       val artifactoryCredentials: ArtifactoryCredentials
       if (extension.getUsername().get().isNullOrBlank() || extension.getPassword().get().isNullOrBlank()) {
@@ -48,6 +42,8 @@ class MuxArtifactoryPlugin: Plugin<Project> {
         artifactoryCredentials = ArtifactoryCredentials(username!!, password!!)
       }
 
+      val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
+        ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
       artifactoryExt.artifactory {
         it.setContextUrl(extension.getContextUrl())
 
