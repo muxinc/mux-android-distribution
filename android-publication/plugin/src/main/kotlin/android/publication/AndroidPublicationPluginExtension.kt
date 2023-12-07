@@ -3,6 +3,7 @@ package android.publication
 import com.android.build.gradle.internal.api.BaseVariantImpl
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import org.gradle.api.publish.maven.MavenPom
 
 abstract class AndroidPublicationPluginExtension {
   internal lateinit var project: Project
@@ -13,8 +14,13 @@ abstract class AndroidPublicationPluginExtension {
   internal var releaseVersionFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var devVersionFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var publishIfFn: ((variant: BaseVariantImpl) -> Boolean)? = null
+  internal var pomFn: ((variant: BaseVariantImpl) -> MavenPom)? = null
 
   abstract fun getPackageSources(): Property<Boolean>
+
+  fun pom(pom: (variant: BaseVariantImpl) -> MavenPom) {
+    pomFn = pom
+  }
 
   fun groupId(block: (variant: BaseVariantImpl) -> String) {
     groupIdFn = block
