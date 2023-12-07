@@ -18,6 +18,8 @@ repositories {
 dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.3")
+  val mockkVersion = "1.13.8"
+  testImplementation("io.mockk:mockk:${mockkVersion}")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   api("org.apache.commons:commons-math3:3.6.1")
