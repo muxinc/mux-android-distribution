@@ -31,7 +31,7 @@ object GitBasedVersion {
   /**
    * Generates a version name from the shortened hash of the current commit and the name of the current branch
    */
-  fun versionNameFromCommit(prefix: String? = "dev-"): String {
+  fun versionNameFromCommit(prefix: String? = null): String {
     return if (prefix.isNullOrBlank()) {
       "${versionSafeBranchName()}-${Git.shortCommit()}"
     } else {
@@ -55,5 +55,5 @@ object GitBasedVersion {
   /**
    * Returns a version of the branch name that is safe to use as a string readable by gradle
    */
-  private fun versionSafeBranchName() = Git.currentBranch().replace('/', '-')
+  fun versionSafeBranchName() = Git.currentBranch().replace('/', '-')
 }

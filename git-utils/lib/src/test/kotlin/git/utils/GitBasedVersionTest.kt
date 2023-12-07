@@ -1,7 +1,9 @@
 package git.utils
 
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -36,5 +38,35 @@ class GitBasedVersionTest {
 
     val detached = GitBasedVersion.isDetachedOnReleaseTag()
     assertFalse(detached, "If we're on a branch and HEAD also has a tag, we are not 'on a release tag'")
+  }
+
+  @Test
+  fun `versionNameFromCommit with a prefix`() {
+    mockkObject(Git)
+    every { Git.currentBranch() } returns "branch"
+    every { Git.shortCommit() } returns "beebead"
+
+    val versionName = GitBasedVersion.versionNameFromCommit("prefix-")
+    val expectedVersionName = "prefix-branch-beebead"
+    assertEquals(
+      versionName,
+      expectedVersionName,
+      "Generated version name should be $expectedVersionName"
+    )
+  }
+
+  @Test
+  fun `versionNameFromCommit without a prefix`() {
+    mockkObject(Git)
+    every { Git.currentBranch() } returns "branch"
+    every { Git.shortCommit() } returns "beebead"
+
+    val versionName = GitBasedVersion.versionNameFromCommit()
+    val expectedVersionName = "branch-beebead"
+    assertEquals(
+      versionName,
+      expectedVersionName,
+      "Generated version name should be $expectedVersionName"
+    )
   }
 }
