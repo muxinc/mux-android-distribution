@@ -104,5 +104,10 @@ class GitBasedVersionTest {
 
     val safeBranchName = GitBasedVersion.versionSafeBranchName()
     val expectedVersionName = "testing-mock-branch-name-with-some-odd-chars"
+    assertEquals(
+      safeBranchName,
+      expectedVersionName,
+      "Safe Branch names don't have slashes or spaces"
+    )
   }
 }
