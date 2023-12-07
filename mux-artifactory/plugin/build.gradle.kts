@@ -23,12 +23,20 @@ dependencies {
   implementation("org.jfrog.buildinfo:build-info-extractor-gradle:5.1.11")
 }
 
+// todo - use the publication module for plugin version instead
+version = "0.0.1"
+group = "com.mux.gradle"
+java {
+  withSourcesJar()
+}
+// gradlePlugin will also create the deployments and stuff
 gradlePlugin {
   val muxArtifactory by plugins.creating {
     id = "com.mux.gradle.artifactory"
     implementationClass = "mux.artifactory.MuxArtifactoryPlugin"
     displayName = "Mux Android Artifactory Plugin"
-    description = "(Thinly) Automates configuring and uploading to Artifactory"
+    description = "(Thinly) Automates configuring and uploading to Artifactory, allowing you to specify both dev and " +
+            "release repositories"
   }
 }
 

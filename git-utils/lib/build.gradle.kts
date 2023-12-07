@@ -8,10 +8,11 @@
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
   `java-library`
+  `maven-publish`
 }
 
 repositories {
-  // Use Maven Central for resolving dependencies.
+  mavenLocal()
   mavenCentral()
 }
 
@@ -37,4 +38,29 @@ java {
 tasks.named<Test>("test") {
   // Use JUnit Platform for unit tests.
   useJUnitPlatform()
+}
+
+// todo - replace with java dist plugin you'll make for core + these modules
+group = "com.mux.gradle"
+version = "0.0.1" // todo - use the plugin for this instead
+publishing {
+  // just publishing to maven local and within the monorepo for now
+  publications {
+    create<MavenPublication>("library") {
+      artifactId = "git-utils"
+      from(components["java"]) // todo - kotlin too right?
+
+      pom {
+        name = "Mux Gradle Git Utils"
+        description = "Utilities for using Git for build-related stuff in gradle tasks"
+        developers {
+          developer {
+            id = "playerandsdks"
+            name = "The Player and SDKs team @Mux"
+            email = "player@mux.com"
+          }
+        }
+      }
+    }
+  }
 }

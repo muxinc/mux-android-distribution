@@ -16,13 +16,14 @@ plugins {
 repositories {
   // Use Maven Central for resolving dependencies.
   mavenCentral()
+  google()
 }
 
 dependencies {
   // Use the Kotlin JUnit 5 integration.
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-  implementation("com.android.tools.build:gradle:7.2.2")
+  implementation("com.android.tools.build:gradle:8.1.0")
 
   implementation(gradleApi())
 }
