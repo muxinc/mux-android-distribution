@@ -55,5 +55,6 @@ object GitBasedVersion {
   /**
    * Returns a version of the branch name that is safe to use as a string readable by gradle
    */
-  fun versionSafeBranchName() = Git.currentBranch().replace('/', '-')
+  fun versionSafeBranchName() = Git.currentBranch()
+    .replace(Regex("""[/\\ ]"""), "-")
 }

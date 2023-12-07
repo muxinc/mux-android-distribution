@@ -1,7 +1,6 @@
 package git.utils
 
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -96,5 +95,14 @@ class GitBasedVersionTest {
       expectedVersionName,
       "Generated version name should be $expectedVersionName"
     )
+  }
+
+  @Test
+  fun `versionSafeBranchName should replace forward-slashes with dashes`() {
+    mockkObject(Git)
+    every { Git.currentBranch() } returns "testing/mock-branch-name with\\some-odd chars"
+
+    val safeBranchName = GitBasedVersion.versionSafeBranchName()
+    val expectedVersionName = "testing-mock-branch-name-with-some-odd-chars"
   }
 }
