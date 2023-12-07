@@ -45,6 +45,7 @@ artifactory {
       password = artifactoryPassword
     }
     defaults {
+      // the gradle-plugin plugin makes our publications for us
       publications 'ALL_PUBLICATIONS'
     }
   }
