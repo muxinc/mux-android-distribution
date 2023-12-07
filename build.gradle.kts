@@ -10,3 +10,11 @@ tasks.register("assembleAll") {
     dependsOn(gradle.includedBuild("android-publication").task(":plugin:assemble"))
   }
 }
+
+tasks.register("publishAllToMavenLocal") {
+  val publishGitUtils = dependsOn(
+    gradle.includedBuild("git-utils")
+      .task(":lib:publishToMavenLocal")
+  )
+  // todo - publish the plugins as we get to that point
+}

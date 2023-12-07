@@ -42,7 +42,7 @@ tasks.named<Test>("test") {
 
 // todo - replace with java dist plugin you'll make for core + these modules
 group = "com.mux.gradle"
-version = "0.0.1" // todo - use the plugin for this instead
+version = "0.0.2" // todo - use the plugin for this instead
 publishing {
   // just publishing to maven local and within the monorepo for now
   publications {
