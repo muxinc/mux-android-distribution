@@ -25,15 +25,25 @@ class MuxArtifactoryPluginFunctionalTest {
         settingsFile.writeText("")
         buildFile.writeText("""
             plugins {
-                id('mux.artifactory.greeting')
+                id('com.mux.gradle.artifactory')
             }
+            
+            muxArtifactory {
+              username = "user"
+              password = "password"
+              devRepoKey = "dev repo"
+              releaseRepoKey = "dev repo"
+              contextUrl = "context url"
+              publishToProdIf { false }
+            }
+            
         """.trimIndent())
 
         // Run the build
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("greeting")
+        runner.withArguments("artifactoryPublish")
         runner.withProjectDir(projectDir)
         val result = runner.build()
 

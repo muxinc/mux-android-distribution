@@ -6,6 +6,7 @@ package mux.artifactory
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.internal.artifacts.ArtifactPublicationServices
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 
@@ -23,7 +24,7 @@ class MuxArtifactoryPlugin: Plugin<Project> {
     private lateinit var extension: MuxArtifactoryPluginExtension
     private lateinit var project: Project
 
-    internal lateinit var publishToProd: () -> Boolean
+    internal var publishToProd: (() -> Boolean)? = null
 
     override fun apply(project: Project) {
       this.project = project
@@ -32,35 +33,46 @@ class MuxArtifactoryPlugin: Plugin<Project> {
       this.extension.project = project
       project.plugins.apply(ArtifactoryPlugin::class.java)
 
-      val artifactoryCredentials: ArtifactoryCredentials
-      if (extension.getUsername().get().isNullOrBlank() || extension.getPassword().get().isNullOrBlank()) {
-        artifactoryCredentials = artifactoryCredentialsFromLocalProperties(project)
-      } else {
-        val username = extension.getUsername().get()
-        val password = extension.getPassword().get()
-        @Suppress("UNNECESSARY_NOT_NULL_ASSERTION") // it's necessary, wtf
-        artifactoryCredentials = ArtifactoryCredentials(username!!, password!!)
-      }
-
-      val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
-        ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
-      artifactoryExt.artifactory {
-        it.setContextUrl(extension.getContextUrl())
-
-        it.publish {  publisherConfig ->
-          publisherConfig.repository { repository ->
-            if (publishToProd()) {
-              repository.setRepoKey(extension.getReleaseRepoKey().get())
-              repository.setUsername(artifactoryCredentials.username)
-              repository.setPassword(artifactoryCredentials.password)
-            }
+      println("Registering task before publish");
+      project.tasks.named("artifactoryPublish") {
+        it.doFirst {
+          val artifactoryCredentials: ArtifactoryCredentials
+          println("... Checking extension")
+          if (extension.getUsername().isPresent && extension.getPassword().isPresent) {
+            println("... getting creds from ext")
+            val username = extension.getUsername().get()
+            val password = extension.getPassword().get()
+            @Suppress("UNNECESSARY_NOT_NULL_ASSERTION") // it's necessary, wtf
+            artifactoryCredentials = ArtifactoryCredentials(username!!, password!!)
+          } else {
+            println("... getting creds from prpos")
+            artifactoryCredentials = artifactoryCredentialsFromLocalProperties(project)
           }
-          publisherConfig.defaults { artifactoryTask ->
-            // Todo: hopefully this is adequate without creating tons of extra publications
-            artifactoryTask.publications("ALL_PUBLICATIONS")
+
+          val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
+            ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
+          println("... configuring artifactory with creds $artifactoryCredentials")
+          artifactoryExt.apply {
+            setContextUrl(extension.getContextUrl().get())
+            publish {  publisherConfig ->
+              publisherConfig.repository { repository ->
+                val prodFn = publishToProd ?: { true }
+                if (prodFn()) {
+                  repository.setRepoKey(extension.getReleaseRepoKey().get())
+                  repository.setUsername(artifactoryCredentials.username)
+                  repository.setPassword(artifactoryCredentials.password)
+                }
+              }
+              publisherConfig.defaults { artifactoryTask ->
+                // Todo: hopefully this is adequate without creating tons of extra publications
+                artifactoryTask.publications("ALL_PUBLICATIONS")
+              }
+            }
           }
         }
       }
+
+
 
       // TODO: must configure artifactory after all apply()s
       //  or do I? Just try with ALL

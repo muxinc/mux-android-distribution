@@ -14,7 +14,7 @@ abstract class MuxArtifactoryPluginExtension {
   abstract fun getDevRepoKey(): Property<String?>
   abstract fun getReleaseRepoKey(): Property<String?>
 
-  fun publishToProdIf(block: ( ) -> Boolean)  {
+  fun publishToProdIf(block: () -> Boolean)  {
     plugin.publishToProd = block
   }
 }
