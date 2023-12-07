@@ -10,12 +10,10 @@ import org.gradle.api.Plugin
  * A simple 'hello world' plugin.
  */
 class AndroidPublicationPlugin: Plugin<Project> {
+
+    internal lateinit var extension: AndroidPublicationPluginExtension
+    internal lateinit var project: Project
+
     override fun apply(project: Project) {
-        // Register a task
-        project.tasks.register("greeting") { task ->
-            task.doLast {
-                println("Hello from plugin 'android.publication.greeting'")
-            }
-        }
     }
 }
