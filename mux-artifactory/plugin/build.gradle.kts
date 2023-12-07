@@ -19,10 +19,10 @@ repositories {
 }
 
 dependencies {
-    // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation(gradleApi())
 }
 
 gradlePlugin {
