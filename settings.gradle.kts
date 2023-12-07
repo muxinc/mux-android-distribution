@@ -9,7 +9,6 @@ rootProject.name = "mux_android_build_plugins"
 
 pluginManagement {
   includeBuild("distribution-old")
-  includeBuild("distribution")
   includeBuild("dokka")
   includeBuild("git-utils")
   includeBuild("mux-artifactory")
