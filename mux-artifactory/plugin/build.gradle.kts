@@ -6,10 +6,7 @@
  */
 
 plugins {
-    // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
-
-    // Apply the Kotlin JVM plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.9.10"
 }
 
@@ -23,6 +20,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation(gradleApi())
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:5.1.11")
 }
 
 gradlePlugin {
