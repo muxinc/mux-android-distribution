@@ -6,31 +6,32 @@
  */
 
 plugins {
-    // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
-    `java-gradle-plugin`
-
-    // Apply the Kotlin JVM plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.9.10"
+  // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
+  `java-gradle-plugin`
+  // Apply the Kotlin JVM plugin to add support for Kotlin.
+  id("org.jetbrains.kotlin.jvm") version "1.9.10"
+  groovy
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
-    mavenCentral()
+  // Use Maven Central for resolving dependencies.
+  mavenLocal()
+  mavenCentral()
 }
 
 dependencies {
-    // Use the Kotlin JUnit 5 integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+  // Use the Kotlin JUnit 5 integration.
+  testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 gradlePlugin {
-    // Define the plugin
-    val greeting by plugins.creating {
-        id = "distribution.greeting"
-        implementationClass = "distribution.DistributionPlugin"
-    }
+  // Define the plugin
+  val greeting by plugins.creating {
+    id = "distribution.greeting"
+    implementationClass = "distribution.DistributionPlugin"
+  }
 }
 
 // Add a source set for the functional test suite
@@ -42,19 +43,19 @@ configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRunt
 
 // Add a task to run the functional tests
 val functionalTest by tasks.registering(Test::class) {
-    testClassesDirs = functionalTestSourceSet.output.classesDirs
-    classpath = functionalTestSourceSet.runtimeClasspath
-    useJUnitPlatform()
+  testClassesDirs = functionalTestSourceSet.output.classesDirs
+  classpath = functionalTestSourceSet.runtimeClasspath
+  useJUnitPlatform()
 }
 
 gradlePlugin.testSourceSets.add(functionalTestSourceSet)
 
 tasks.named<Task>("check") {
-    // Run the functional tests as part of `check`
-    dependsOn(functionalTest)
+  // Run the functional tests as part of `check`
+  dependsOn(functionalTest)
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Jupiter for unit tests.
-    useJUnitPlatform()
+  // Use JUnit Jupiter for unit tests.
+  useJUnitPlatform()
 }
