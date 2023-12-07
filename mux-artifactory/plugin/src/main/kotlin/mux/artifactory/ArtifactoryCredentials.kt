@@ -11,8 +11,8 @@ data class ArtifactoryCredentials(
 
 @Throws
 fun artifactoryCredentialsFromLocalProperties(ofProject: Project): ArtifactoryCredentials {
-  val username = fromEnvKey(USERNAME_KEY) ?: fromLocalPropertyKey(USERNAME_KEY, ofProject)
-  val password = fromEnvKey(PASSWORD_KEY) ?: fromLocalPropertyKey(PASSWORD_KEY, ofProject)
+  val username =  fromLocalPropertyKey(USERNAME_KEY, ofProject) ?: fromEnvVar(USERNAME_KEY)
+  val password = fromLocalPropertyKey(PASSWORD_KEY, ofProject) ?: fromEnvVar(PASSWORD_KEY)
 
   return if (username.isNullOrBlank() || password.isNullOrBlank()) {
     throw GradleException("Artifactory Username and Password are required if using muxArtifactory")
@@ -24,7 +24,7 @@ fun artifactoryCredentialsFromLocalProperties(ofProject: Project): ArtifactoryCr
 private const val USERNAME_KEY = "artifactory_user"
 private const val PASSWORD_KEY = "artifactory_password"
 
-private fun fromEnvKey(key: String): String? {
+private fun fromEnvVar(key: String): String? {
   return System.getenv()["ORG_GRADLE_PROJECT_$key"]
 }
 

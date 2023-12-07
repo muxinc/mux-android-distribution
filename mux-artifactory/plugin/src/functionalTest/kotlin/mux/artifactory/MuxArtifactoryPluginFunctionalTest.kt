@@ -19,6 +19,7 @@ class MuxArtifactoryPluginFunctionalTest {
 
     private val buildFile by lazy { projectDir.resolve("build.gradle") }
     private val settingsFile by lazy { projectDir.resolve("settings.gradle") }
+    private val propsFile by lazy { projectDir.resolve("local.properties") }
 
     @Test fun `can run task`() {
         // Set up the test build
@@ -29,11 +30,9 @@ class MuxArtifactoryPluginFunctionalTest {
             }
             
             muxArtifactory {
-              username = "user"
-              password = "password"
-              devRepoKey = "dev repo"
-              releaseRepoKey = "dev repo"
-              contextUrl = "context url"
+              contextUrl = "https://muxinc.jfrog.io/artifactory/"
+              releaseRepoKey = 'default-maven-release-local'
+              devRepoKey = 'default-maven-local'
               publishToProdIf { false }
             }
             
@@ -45,6 +44,7 @@ class MuxArtifactoryPluginFunctionalTest {
         runner.withPluginClasspath()
         runner.withArguments("artifactoryPublish")
         runner.withProjectDir(projectDir)
+        // NOTE!! Doesn't really pass. Can't give real values to artifactory to test, fails with 401
         val result = runner.build()
 
         // Verify the result
