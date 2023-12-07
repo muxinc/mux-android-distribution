@@ -14,11 +14,11 @@ abstract class AndroidPublicationPluginExtension {
   internal var releaseVersionFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var devVersionFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var publishIfFn: ((variant: BaseVariantImpl) -> Boolean)? = null
-  internal var pomFn: ((variant: BaseVariantImpl) -> MavenPom)? = null
+  internal var pomFn: (() -> MavenPom)? = null
 
   abstract fun getPackageSources(): Property<Boolean>
 
-  fun pom(pom: (variant: BaseVariantImpl) -> MavenPom) {
+  fun pom(pom: () -> MavenPom) {
     pomFn = pom
   }
 
