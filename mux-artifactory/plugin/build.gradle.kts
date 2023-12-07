@@ -26,7 +26,7 @@ dependencies {
 gradlePlugin {
     // Define the plugin
     val greeting by plugins.creating {
-        id = "mux.artifactory.greeting"
+        id = "com.mux.gradle.artifactory"
         implementationClass = "mux.artifactory.MuxArtifactoryPlugin"
     }
 }
