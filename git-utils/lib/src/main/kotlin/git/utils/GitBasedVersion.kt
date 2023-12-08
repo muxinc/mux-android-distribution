@@ -1,4 +1,4 @@
-package com.mux.gradle.git
+package git.utils
 
 import java.util.regex.Pattern
 
@@ -31,8 +31,12 @@ object GitBasedVersion {
   /**
    * Generates a version name from the shortened hash of the current commit and the name of the current branch
    */
-  fun versionNameFromCommit(prefix: String? = null, postFix: String? = null): String {
-      return "${prefix ?: ""}${versionSafeBranchName()}-${Git.shortCommit()}${postFix ?:""}"
+  fun versionNameFromCommit(prefix: String? = null): String {
+    return if (prefix.isNullOrBlank()) {
+      "${versionSafeBranchName()}-${Git.shortCommit()}"
+    } else {
+      "${prefix}${versionSafeBranchName()}-${Git.shortCommit()}"
+    }
   }
 
   /**

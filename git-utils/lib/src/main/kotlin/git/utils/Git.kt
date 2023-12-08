@@ -1,4 +1,4 @@
-package com.mux.gradle.git
+package git.utils
 
 @Suppress("unused")
 object Git {

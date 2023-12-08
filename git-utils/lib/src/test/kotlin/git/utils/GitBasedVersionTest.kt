@@ -1,4 +1,4 @@
-package com.mux.gradle.git
+package git.utils
 
 import io.mockk.every
 import io.mockk.mockkObject
