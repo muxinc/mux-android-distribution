@@ -29,6 +29,13 @@ gradlePlugin {
     description = "Multi-variant-aware Gradle plugin for creating new Android publications in bulk"
   }
 }
+java {
+  withSourcesJar()
+}
+dist {
+  getGroup().set("com.mux.gradle")
+  getArtifactId().set("android-publication")
+}
 
 // Add a source set for the functional test suite
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
