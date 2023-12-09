@@ -11,9 +11,10 @@ abstract class AndroidPublicationPluginExtension {
 
   internal var groupIdFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var artifactIdFn: ((variant: BaseVariantImpl) -> String)? = null
-  internal var releaseVersionFn: ((variant: BaseVariantImpl) -> String)? = null
-  internal var devVersionFn: ((variant: BaseVariantImpl) -> String)? = null
-  internal var publishIfFn: ((variant: BaseVariantImpl) -> Boolean)? = null
+  internal var releaseVersionFn: (() -> String)? = null
+  internal var devVersionFn: (() -> String)? = null
+  internal var publishVariantIfFn: ((variant: BaseVariantImpl) -> Boolean)? = null
+  internal var publishToProdFn: (() -> Boolean)? = null
   internal var pomFn: (() -> MavenPom)? = null
 
   abstract fun getPackageSources(): Property<Boolean>
@@ -29,13 +30,16 @@ abstract class AndroidPublicationPluginExtension {
   fun artifactId(block: (variant: BaseVariantImpl) -> String) {
     artifactIdFn = block
   }
-  fun releaseVersion(block: (variant: BaseVariantImpl) -> String) {
+  fun releaseVersion(block: () -> String) {
     releaseVersionFn = block
   }
-  fun devVersion(block: (variant: BaseVariantImpl) -> String) {
+  fun devVersion(block: () -> String) {
     devVersionFn = block
   }
-  fun publishIf(block: (variant: BaseVariantImpl) -> Boolean) {
-    publishIfFn = block
+  fun publishVariantIf(block: (variant: BaseVariantImpl) -> Boolean) {
+    publishVariantIfFn = block
+  }
+  fun publishToProdIf(block: () -> Boolean) {
+    publishToProdFn = block
   }
 }

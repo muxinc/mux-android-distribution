@@ -3,9 +3,15 @@
  */
 package com.mux.gradle.android.publication
 
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.LibraryVariant
+import com.android.build.api.variant.LibraryVariantBuilder
+import com.android.build.api.variant.VariantSelector
+import com.android.build.gradle.internal.api.BaseVariantImpl
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.ProjectConfigurationException
+import org.gradle.api.publish.Publication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 
 /**
@@ -15,6 +21,8 @@ class AndroidPublicationPlugin : Plugin<Project> {
 
   private lateinit var extension: AndroidPublicationPluginExtension
   private lateinit var project: Project
+
+  private val createdPublications: List<Publication> = listOf()
 
   override fun apply(project: Project) {
     this.project = project
@@ -27,14 +35,29 @@ class AndroidPublicationPlugin : Plugin<Project> {
     }
 
     project.plugins.apply(MavenPublishPlugin::class.java)
-    processVariants()
+
+    // While we're in the configuration phase
+    // todo - version
+    val prodBuild = extension.publishToProdFn?.invoke() ?: false
+    if (prodBuild) {
+      project.version = extension.releaseVersionFn?.invoke() ?: ""
+    }
+
+    // Later steps
+    @Suppress("UNCHECKED_CAST")
+    processVariants(
+      project.extensions.findByType(AndroidComponentsExtension::class.java)!!
+            as AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>
+    )
   }
 
   // todo - processVariants
   // todo - declarePublications
 
-  private fun processVariants() {
-
+  private fun processVariants(androidComponents: AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>) {
+    // TODO - Implement Variant Filtering (for publishIf)
+    androidComponents.finalizeDsl { ext ->
+    }
   }
 
   @Throws
