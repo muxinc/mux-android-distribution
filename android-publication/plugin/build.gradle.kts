@@ -22,7 +22,7 @@ dependencies {
 
 gradlePlugin {
   // Define the plugin
-  val greeting by plugins.creating {
+  val pub by plugins.creating {
     id = "com.mux.gradle.android.publication"
     implementationClass = "com.mux.gradle.android.publication.AndroidPublicationPlugin"
     displayName = "Mux Android Publication Plugin"
@@ -33,8 +33,8 @@ java {
   withSourcesJar()
 }
 dist {
-  getGroup().set("com.mux.gradle")
-  getArtifactId().set("android-publication")
+  getGroup().set("com.mux.gradle.android")
+  getArtifactId().set("publication")
 }
 
 // Add a source set for the functional test suite

@@ -11,6 +11,12 @@ tasks.register("assembleAll") {
   }
 }
 
+tasks.register("publishAllToArtifactory") {
+  dependsOn(gradle.includedBuild("git-utils").task(":lib:artifactoryPublish"))
+  dependsOn(gradle.includedBuild("mux-artifactory").task(":plugin:artifactoryPublish"))
+  dependsOn(gradle.includedBuild("android-publication").task(":plugin:artifactoryPublish"))
+}
+
 tasks.register("publishAllToMavenLocal") {
   dependsOn(gradle.includedBuild("git-utils").task(":lib:publishToMavenLocal"))
   dependsOn(gradle.includedBuild("mux-artifactory").task(":plugin:publishToMavenLocal"))
