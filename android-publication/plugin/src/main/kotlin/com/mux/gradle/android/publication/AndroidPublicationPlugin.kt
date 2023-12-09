@@ -60,7 +60,28 @@ class AndroidPublicationPlugin : Plugin<Project> {
     //   component by then (but we need to do a little more work because of this)
     androidComponents.finalizeDsl { ext ->
       val flavorContainer = FlavorDimensionContainer()
+      val productFlavors = ext.productFlavors
+      val buildTypes = ext.buildTypes
+
+      if (!productFlavors.isEmpty()) {
+
+      } else {
+        // no flavors, so we can just declare pub variants for each build type
+        buildTypes.forEach {  buildType ->
+          ext.publishing {
+            singleVariant(buildType.name) {
+              if (shouldPackageSources()) {
+                withSourcesJar()
+              }
+            }
+          }
+        }
+      }
     }
+  }
+
+  private fun shouldPackageSources(): Boolean {
+    return extension.getPackageSources().isPresent && extension.getPackageSources().get()
   }
 
   @Throws
