@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 /**
  * Utility functions that generate version strings from the output of git commands
  */
-object GitBasedVersion {
+object MuxVersionNames {
 
   /**
    * The pattern used for matching the names of release tags

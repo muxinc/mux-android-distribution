@@ -1,7 +1,5 @@
 package com.mux.gradle.git
 
-import com.mux.gradle.git.Git
-import com.mux.gradle.git.GitBasedVersion
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,7 +7,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class GitBasedVersionTest {
+class MuxVersionNamesTest {
 
   @Test
   fun `isDetachedOnReleaseTag happy path`() {
@@ -17,7 +15,7 @@ class GitBasedVersionTest {
     every { Git.currentBranch() } returns ""
     every { Git.describe() } returns "v1.2.3"
 
-    val detached = GitBasedVersion.isDetachedOnReleaseTag()
+    val detached = MuxVersionNames.isDetachedOnReleaseTag()
     assertTrue(detached, "If there's no branch name and a vX.Y.Z tag then we are 'on a release tag'")
   }
 
@@ -27,7 +25,7 @@ class GitBasedVersionTest {
     every { Git.currentBranch() } returns "xyzzy"
     every { Git.describe() } returns ""
 
-    val detached = GitBasedVersion.isDetachedOnReleaseTag()
+    val detached = MuxVersionNames.isDetachedOnReleaseTag()
     assertFalse(detached, "If we're on a branch and there's no tag, we are not 'on a release tag'")
   }
 
@@ -37,7 +35,7 @@ class GitBasedVersionTest {
     every { Git.currentBranch() } returns "xyzzy"
     every { Git.describe() } returns "v1.2.3"
 
-    val detached = GitBasedVersion.isDetachedOnReleaseTag()
+    val detached = MuxVersionNames.isDetachedOnReleaseTag()
     assertFalse(detached, "If we're on a branch and HEAD also has a tag, we are not 'on a release tag'")
   }
 
@@ -47,7 +45,7 @@ class GitBasedVersionTest {
     every { Git.currentBranch() } returns "branch"
     every { Git.shortCommit() } returns "beebead"
 
-    val versionName = GitBasedVersion.versionNameFromCommit("prefix-")
+    val versionName = MuxVersionNames.versionNameFromCommit("prefix-")
     val expectedVersionName = "prefix-branch-beebead"
     assertEquals(
       versionName,
@@ -62,7 +60,7 @@ class GitBasedVersionTest {
     every { Git.currentBranch() } returns "branch"
     every { Git.shortCommit() } returns "beebead"
 
-    val versionName = GitBasedVersion.versionNameFromCommit()
+    val versionName = MuxVersionNames.versionNameFromCommit()
     val expectedVersionName = "branch-beebead"
     assertEquals(
       versionName,
@@ -76,7 +74,7 @@ class GitBasedVersionTest {
     mockkObject(Git)
     every { Git.describe() } returns "v1.2.3-g769fe52"
 
-    val versionName = GitBasedVersion.versionNameFromTag()
+    val versionName = MuxVersionNames.versionNameFromTag()
     val expectedVersionName = "v1.2.3-g769fe52"
     assertEquals(
       versionName,
@@ -90,7 +88,7 @@ class GitBasedVersionTest {
     mockkObject(Git)
     every { Git.describe() } returns "v1.2.3"
 
-    val versionName = GitBasedVersion.versionNameFromTag()
+    val versionName = MuxVersionNames.versionNameFromTag()
     val expectedVersionName = "1.2.3"
     assertEquals(
       versionName,
@@ -104,7 +102,7 @@ class GitBasedVersionTest {
     mockkObject(Git)
     every { Git.currentBranch() } returns "testing/mock-branch-name with\\some-odd chars"
 
-    val safeBranchName = GitBasedVersion.versionSafeBranchName()
+    val safeBranchName = MuxVersionNames.versionSafeBranchName()
     val expectedVersionName = "testing-mock-branch-name-with-some-odd-chars"
     assertEquals(
       safeBranchName,
