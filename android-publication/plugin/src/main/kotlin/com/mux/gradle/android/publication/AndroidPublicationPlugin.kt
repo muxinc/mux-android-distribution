@@ -56,7 +56,10 @@ class AndroidPublicationPlugin : Plugin<Project> {
 
   private fun processVariants(androidComponents: AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>) {
     // TODO - Implement Variant Filtering (for publishIf)
+    // we do this in finalizeDsl instead of onVariants because it's too late to declare publication variants for our
+    //   component by then (but we need to do a little more work because of this)
     androidComponents.finalizeDsl { ext ->
+      val flavorContainer = FlavorDimensionContainer()
     }
   }
 
