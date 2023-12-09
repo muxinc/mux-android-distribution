@@ -13,7 +13,7 @@ abstract class AndroidPublicationPluginExtension {
   internal var artifactIdFn: ((variant: BaseVariantImpl) -> String)? = null
   internal var releaseVersionFn: (() -> String)? = null
   internal var devVersionFn: (() -> String)? = null
-  internal var publishVariantIfFn: ((variant: BaseVariantImpl) -> Boolean)? = null
+  internal var publishVariantIfFn: ((variant: String) -> Boolean)? = null
   internal var publishToProdFn: (() -> Boolean)? = null
   internal var pomFn: (() -> MavenPom)? = null
 
@@ -36,7 +36,7 @@ abstract class AndroidPublicationPluginExtension {
   fun devVersion(block: () -> String) {
     devVersionFn = block
   }
-  fun publishVariantIf(block: (variant: BaseVariantImpl) -> Boolean) {
+  fun publishVariantIf(block: (variant: String) -> Boolean) {
     publishVariantIfFn = block
   }
   fun publishToProdIf(block: () -> Boolean) {

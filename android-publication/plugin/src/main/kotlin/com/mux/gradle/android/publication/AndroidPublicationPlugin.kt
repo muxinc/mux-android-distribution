@@ -29,7 +29,7 @@ class AndroidPublicationPlugin : Plugin<Project> {
     initExtension(project)
 
     if (!projectIsAndroidLibrary()) {
-      project.logger.warn("AndroidPublicationPlugin:" +
+      project.logger.warn("muxLibrary:" +
               " Skipping project ${project.name} because the library plugin is not applied")
       return
     }
@@ -41,7 +41,10 @@ class AndroidPublicationPlugin : Plugin<Project> {
     val prodBuild = extension.publishToProdFn?.invoke() ?: false
     if (prodBuild) {
       project.version = extension.releaseVersionFn?.invoke() ?: ""
+    } else {
+      project.version = extension.devVersionFn?.invoke() ?: ""
     }
+    project.logger.info("muxLibrary: Building with version: ${project.version}")
 
     // Later steps
     @Suppress("UNCHECKED_CAST")
@@ -65,6 +68,21 @@ class AndroidPublicationPlugin : Plugin<Project> {
 
       if (!productFlavors.isEmpty()) {
         productFlavors.onEach { flavorContainer.addFlavor(it.dimension?: "", it.name) }
+        val variantNames = variantNames(flavorContainer.asMap().values.toList(), buildTypes)
+        if (extension.publishVariantIfFn == null) {
+          project.logger.warn("muxLibrary")
+        }
+        variantNames
+          .filter { extension.publishVariantIfFn?.invoke(it) ?: false }
+          .onEach { variantName ->
+            ext.publishing {
+              singleVariant(variantName) {
+                if (shouldPackageSources()) {
+                  withSourcesJar()
+                }
+              }
+            }
+          }
       } else {
         // no flavors, so we can just declare pub variants for each build type
         buildTypes.forEach {  buildType ->
