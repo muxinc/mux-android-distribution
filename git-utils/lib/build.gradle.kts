@@ -5,6 +5,9 @@ plugins {
   id("com.mux.gradle.internal.dist")
 }
 
+java {
+  withSourcesJar()
+}
 dist {
   getArtifactId().set("git-utils")
   getGroup().set("com.mux.gradle.git")

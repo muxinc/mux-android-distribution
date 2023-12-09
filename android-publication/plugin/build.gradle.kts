@@ -2,6 +2,7 @@ plugins {
   `java-gradle-plugin`
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
   groovy
+  id("com.mux.gradle.internal.dist")
 }
 
 repositories {
@@ -24,6 +25,8 @@ gradlePlugin {
   val greeting by plugins.creating {
     id = "com.mux.gradle.android.publication"
     implementationClass = "com.mux.gradle.android.publication.AndroidPublicationPlugin"
+    displayName = "Mux Android Publication Plugin"
+    description = "Multi-variant-aware Gradle plugin for creating new Android publications in bulk"
   }
 }
 
