@@ -8,10 +8,12 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.LibraryVariantBuilder
 import com.android.build.api.variant.VariantSelector
-import com.android.build.gradle.internal.api.BaseVariantImpl
+import com.android.builder.model.AndroidLibrary
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.Publication
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 
 /**
@@ -22,7 +24,7 @@ class AndroidPublicationPlugin : Plugin<Project> {
   private lateinit var extension: AndroidPublicationPluginExtension
   private lateinit var project: Project
 
-  private val createdPublications: List<Publication> = listOf()
+  private val publishableVariants = mutableListOf<String>()
 
   override fun apply(project: Project) {
     this.project = project
@@ -52,10 +54,53 @@ class AndroidPublicationPlugin : Plugin<Project> {
       project.extensions.findByType(AndroidComponentsExtension::class.java)!!
             as AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>
     )
+    @Suppress("UNCHECKED_CAST")
+    declarePublications(
+      project.extensions.findByType(AndroidComponentsExtension::class.java)!!
+              as AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>
+    )
   }
 
   // todo - processVariants
   // todo - declarePublications
+
+  private fun declarePublications(
+    androidComponents: AndroidComponentsExtension<
+            LibraryExtension,
+            LibraryVariantBuilder,
+            LibraryVariant
+            >
+  ) {
+    project.afterEvaluate {
+      // todo - in the original we iterated over the (difficult-to-reach) library variants.
+      //  this time we're trying onVariants
+    }
+
+    // todo - is this soon enough? It's after finalizeDsl which should be all we need
+    // we don't need to filter variants here, just don't create publications for all variants
+    androidComponents.onVariants { variant ->
+      // todo - if it's not soon enough, do an afterEvaluate here
+      if(extension.publishVariantIfFn?.invoke(variant.name) == true) {
+        project.extensions.findByType(PublishingExtension::class.java)!!.publications.create(
+          variant.name, MavenPublication::class.java
+        ) { pub ->
+          val artifactId = extension.artifactIdFn?.invoke(variant) ?: variant.name
+          val groupId = extension.groupIdFn?.invoke(variant) ?: ""
+
+          pub.from(project.components.findByName(variant.name))
+          pub.artifactId = artifactId
+          pub.groupId = groupId
+          @Suppress("UNNECESSARY_SAFE_CALL")
+          pub.version = project.version?.toString() ?: "null"
+
+          if (extension.pomFn != null) {
+            pub.pom { extension.pomFn?.invoke(it) }
+          }
+          project.logger.info("muxLibrary: Created Publication $pub")
+        }
+      }
+    }
+  }
 
   private fun processVariants(androidComponents: AndroidComponentsExtension<LibraryExtension, LibraryVariantBuilder, LibraryVariant>) {
     // TODO - Implement Variant Filtering (for publishIf)
@@ -83,6 +128,7 @@ class AndroidPublicationPlugin : Plugin<Project> {
               }
             }
           }
+          .also { this.publishableVariants.addAll(it) }
       } else {
         // no flavors, so we can just declare pub variants for each build type
         buildTypes.forEach {  buildType ->
