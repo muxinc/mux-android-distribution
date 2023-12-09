@@ -1,5 +1,7 @@
-package git.utils
+package com.mux.gradle.git
 
+import com.mux.gradle.git.Git
+import com.mux.gradle.git.GitBasedVersion
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
