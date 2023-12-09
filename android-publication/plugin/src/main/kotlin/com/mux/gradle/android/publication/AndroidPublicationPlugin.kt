@@ -93,7 +93,9 @@ class AndroidPublicationPlugin : Plugin<Project> {
           if (extension.pomFn != null) {
             pub.pom { extension.pomFn?.invoke(it) }
           }
-          project.logger.info("muxLibrary: Created Publication $pub")
+          project.logger.info("muxLibrary: Created Publication with name${pub.name}")
+          project.logger.info("muxLibrary: Created Publication with version ${pub.version}")
+          project.logger.info("muxLibrary: Dumping publication $pub")
         }
       }
     }
