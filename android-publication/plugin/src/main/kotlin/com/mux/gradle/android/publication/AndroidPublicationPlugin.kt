@@ -3,17 +3,39 @@
  */
 package com.mux.gradle.android.publication
 
-import org.gradle.api.Project
 import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.ProjectConfigurationException
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 
 /**
  * A simple 'hello world' plugin.
  */
-class AndroidPublicationPlugin: Plugin<Project> {
+class AndroidPublicationPlugin : Plugin<Project> {
 
-    internal lateinit var extension: AndroidPublicationPluginExtension
-    internal lateinit var project: Project
+  internal lateinit var extension: AndroidPublicationPluginExtension
+  internal lateinit var project: Project
 
-    override fun apply(project: Project) {
+  override fun apply(project: Project) {
+    this.project = project
+    initExtension(project)
+
+    project.plugins.apply(MavenPublishPlugin::class.java)
+  }
+
+  @Throws
+  private fun checkAndroidInstalled() {
+    if (!project.plugins.hasPlugin("com.android.library")) {
+      @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+      throw ProjectConfigurationException(
+        "This plugin only works with android library modules, and you must apply android-library *first*",
+        null as Throwable?
+      )
     }
+  }
+  private fun initExtension(project: Project) {
+    this.extension = project.extensions.create("muxLibrary", AndroidPublicationPluginExtension::class.java)
+    extension.plugin = this
+    extension.project = project
+  }
 }
