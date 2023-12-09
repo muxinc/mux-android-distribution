@@ -10,6 +10,8 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
 }
 
+group = "com.mux.gradle.internal"
+
 repositories {
   // Use Maven Central for resolving dependencies.
   mavenCentral()
@@ -26,7 +28,7 @@ dependencies {
 gradlePlugin {
   // Define the plugin
   val greeting by plugins.creating {
-    id = "com.mux.gradle.internal.greeting"
+    id = "com.mux.gradle.internal.dist"
     implementationClass = "com.mux.gradle.internal.InternalDistPlugin"
   }
 }

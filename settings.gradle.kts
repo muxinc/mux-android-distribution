@@ -11,8 +11,9 @@ pluginManagement {
   includeBuild("internal-dist")
   includeBuild("distribution-old")
   includeBuild("dokka")
-  includeBuild("git-utils")
   includeBuild("mux-artifactory")
   includeBuild("android-publication")
 }
+
+includeBuild("git-utils")
 

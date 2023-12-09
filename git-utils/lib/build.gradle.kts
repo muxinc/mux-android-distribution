@@ -7,6 +7,7 @@
 
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
+  id("com.mux.gradle.internal.dist")
   `java-library`
   `maven-publish`
 }
