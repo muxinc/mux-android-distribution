@@ -24,7 +24,6 @@ class InternalDistPlugin : Plugin<Project> {
 
   override fun apply(project: Project) {
     project.plugins.apply(ArtifactoryPlugin::class.java)
-    project.extensions.create("dist", InternalDistExtension::class.java)
 
     // version
     // A real version while on a tag, otherwise a dev version (different format from mux libs)
