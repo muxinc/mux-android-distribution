@@ -64,7 +64,7 @@ class AndroidPublicationPlugin : Plugin<Project> {
       val buildTypes = ext.buildTypes
 
       if (!productFlavors.isEmpty()) {
-
+        productFlavors.onEach { flavorContainer.addFlavor(it.dimension?: "", it.name) }
       } else {
         // no flavors, so we can just declare pub variants for each build type
         buildTypes.forEach {  buildType ->
