@@ -38,20 +38,20 @@ class InternalDistPlugin : Plugin<Project> {
       it.doFirst {
         fun artifactoryCredential(key: String): String {
           val propsFile = project.rootProject.file("local.properties")
-          if (propsFile.exists()) {
+          return if (propsFile.exists()) {
             val props = Properties()
             props.load(propsFile.inputStream())
-            return props.getProperty(key)
+            props.getProperty(key)
           } else {
-            return System.getenv("ORG_GRADLE_PROJECT_$key")
+            System.getenv("ORG_GRADLE_PROJECT_$key")
           }
         }
         val artifactoryUser = artifactoryCredential("artifactory_user")
         val artifactoryPassword = artifactoryCredential("artifactory_password")
         val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
           ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
+        project.logger.lifecycle("Artifactory: $artifactoryUser:$artifactoryPassword")
 
-        println("... configuring artifactory with creds $artifactoryUser:$artifactoryPassword")
         artifactoryExt.apply {
           setContextUrl("https://muxinc.jfrog.io/artifactory/")
           publish {  publisherConfig ->
