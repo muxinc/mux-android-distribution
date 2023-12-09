@@ -1,8 +1,12 @@
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.9.10"
-  id("com.mux.gradle.internal.dist")
   `java-library`
   `maven-publish`
+  id("com.mux.gradle.internal.dist")
+}
+
+dist {
+
 }
 
 repositories {
@@ -37,24 +41,24 @@ tasks.named<Test>("test") {
 java {
   withSourcesJar()
 }
-publishing {
-  // just publishing to maven local and within the monorepo for now
-  publications {
-    create<MavenPublication>("library") {
-      artifactId = "git-utils"
-      from(components["java"]) // todo - kotlin too right?
-
-      pom {
-        name = "Mux Gradle Git Utils"
-        description = "Utilities for using Git for build-related stuff in gradle tasks"
-        developers {
-          developer {
-            id = "playerandsdks"
-            name = "The Player and SDKs team @Mux"
-            email = "player@mux.com"
-          }
-        }
-      }
-    }
-  }
-}
+//publishing {
+//  // just publishing to maven local and within the monorepo for now
+//  publications {
+//    create<MavenPublication>("library") {
+//      artifactId = "git-utils"
+//      from(components["java"]) // todo - kotlin too right?
+//
+//      pom {
+//        name = "Mux Gradle Git Utils"
+//        description = "Utilities for using Git for build-related stuff in gradle tasks"
+//        developers {
+//          developer {
+//            id = "playerandsdks"
+//            name = "The Player and SDKs team @Mux"
+//            email = "player@mux.com"
+//          }
+//        }
+//      }
+//    }
+//  }
+//}

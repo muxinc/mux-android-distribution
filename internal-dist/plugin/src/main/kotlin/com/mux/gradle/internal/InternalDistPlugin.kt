@@ -6,6 +6,9 @@ package com.mux.gradle.internal
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.publish.Publication
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import java.util.*
@@ -23,7 +26,10 @@ class InternalDistPlugin : Plugin<Project> {
   val VERSION_TAG_NAME_PATTERN: Pattern = Pattern.compile("""^v(\d+\.\d+\.\d+)$""")
 
   override fun apply(project: Project) {
+    val extension = project.extensions.create("dist", InternalDistExtension::class.java)
+
     project.plugins.apply(ArtifactoryPlugin::class.java)
+    project.plugins.apply("maven-publish")
 
     // version
     // A real version while on a tag, otherwise a dev version (different format from mux libs)
@@ -32,6 +38,25 @@ class InternalDistPlugin : Plugin<Project> {
       .joinToString("\n").trim()
     project.version = pluginVersion
     project.logger.lifecycle("internal dist: attaching version ${project.version}")
+
+    // publication
+    var libPublication: Publication? = null
+    project.extensions.findByType(PublishingExtension::class.java)?.apply {
+      publications { pc ->
+        libPublication = pc.create("library", MavenPublication::class.java) { newPub ->
+          if (extension.getArtifactId().isPresent) {
+            newPub.artifactId = extension.getArtifactId().get()
+          }
+          if (extension.getGroup().isPresent) {
+            newPub.groupId = extension.getGroup().get()
+          }
+          newPub.version = pluginVersion
+          newPub.pom { extension.pomFn?.invoke(it) }
+
+          newPub.from(project.components.findByName("java"))
+        }
+      }
+    }
 
     // artifactory
     project.tasks.named("artifactoryPublish") {
@@ -69,7 +94,8 @@ class InternalDistPlugin : Plugin<Project> {
               repository.setPassword(artifactoryPassword)
             }
             publisherConfig.defaults { artifactoryTask ->
-              artifactoryTask.publications("ALL_PUBLICATIONS")
+//              artifactoryTask.publications("ALL_PUBLICATIONS")
+              artifactoryTask.publications(libPublication)
             }
           }
         }
