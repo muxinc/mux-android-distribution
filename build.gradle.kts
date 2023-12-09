@@ -12,9 +12,7 @@ tasks.register("assembleAll") {
 }
 
 tasks.register("publishAllToMavenLocal") {
-  val publishGitUtils = dependsOn(
-    gradle.includedBuild("git-utils")
-      .task(":lib:publishToMavenLocal")
-  )
-  // todo - publish the plugins as we get to that point
+  dependsOn(gradle.includedBuild("git-utils").task(":lib:publishToMavenLocal"))
+  dependsOn(gradle.includedBuild("mux-artifactory").task(":plugin:publishToMavenLocal"))
+  dependsOn(gradle.includedBuild("android-publication").task(":plugin:publishToMavenLocal"))
 }
