@@ -1,4 +1,4 @@
-package android.publication
+package com.mux.gradle.android.publication
 
 import com.android.build.gradle.internal.api.BaseVariantImpl
 import org.gradle.api.Project

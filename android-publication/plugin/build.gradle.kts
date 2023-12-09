@@ -32,7 +32,7 @@ gradlePlugin {
   // Define the plugin
   val greeting by plugins.creating {
     id = "com.mux.gradle.android.publication"
-    implementationClass = "android.publication.AndroidPublicationPlugin"
+    implementationClass = "com.mux.gradle.android.publication.AndroidPublicationPlugin"
   }
 }
 
