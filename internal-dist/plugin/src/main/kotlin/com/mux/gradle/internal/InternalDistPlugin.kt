@@ -6,7 +6,6 @@ package com.mux.gradle.internal
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
@@ -40,64 +39,62 @@ class InternalDistPlugin : Plugin<Project> {
     project.logger.lifecycle("internal dist: attaching version ${project.version}")
 
     // publication
-    var libPublication: Publication? = null
-    project.extensions.findByType(PublishingExtension::class.java)?.apply {
-      publications { pc ->
-        libPublication = pc.create("library", MavenPublication::class.java) { newPub ->
-          if (extension.getArtifactId().isPresent) {
-            newPub.artifactId = extension.getArtifactId().get()
-          }
-          if (extension.getGroup().isPresent) {
-            newPub.groupId = extension.getGroup().get()
-          }
-          newPub.version = pluginVersion
-          newPub.pom { extension.pomFn?.invoke(it) }
+    project.afterEvaluate {
+      project.extensions.findByType(PublishingExtension::class.java)?.apply {
+        repositories {
 
-          newPub.from(project.components.findByName("java"))
+        }
+        publications { pc ->
+          pc.create("library", MavenPublication::class.java) { newPub ->
+            if (extension.getArtifactId().isPresent) {
+              newPub.artifactId = extension.getArtifactId().get()
+            }
+            if (extension.getGroup().isPresent) {
+              newPub.groupId = extension.getGroup().get()
+            }
+            newPub.version = pluginVersion
+            newPub.pom { extension.pomFn?.invoke(it) }
+            newPub.from(project.components.findByName("java"))
+          }
         }
       }
     }
 
     // artifactory
-    project.tasks.named("artifactoryPublish") {
-      it.doFirst {
-        fun artifactoryCredential(key: String): String {
-          val propsFile = project.rootProject.file("local.properties")
-          return if (propsFile.exists()) {
-            val props = Properties()
-            props.load(propsFile.inputStream())
-            props.getProperty(key)
+    fun artifactoryCredential(key: String): String {
+      val propsFile = project.rootProject.file("local.properties")
+      return if (propsFile.exists()) {
+        val props = Properties()
+        props.load(propsFile.inputStream())
+        props.getProperty(key)
+      } else {
+        System.getenv("ORG_GRADLE_PROJECT_$key")
+      }
+    }
+
+    val artifactoryUser = artifactoryCredential("artifactory_user")
+    val artifactoryPassword = artifactoryCredential("artifactory_password")
+    val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
+      ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
+
+    artifactoryExt.apply {
+      setContextUrl("https://muxinc.jfrog.io/artifactory/")
+      publish { publisherConfig ->
+        publisherConfig.repository { repository ->
+          val matcher = VERSION_TAG_NAME_PATTERN.matcher(pluginVersion).also { it.find() }
+          val prod = matcher.matches()
+
+          if (prod) {
+            project.logger.warn("Mux: Warning!! Publishing to Prod!!")
+            repository.setRepoKey("default-maven-release-local")
           } else {
-            System.getenv("ORG_GRADLE_PROJECT_$key")
+            repository.setRepoKey("default-maven-local")
           }
+          repository.setUsername(artifactoryUser)
+          repository.setPassword(artifactoryPassword)
         }
-        val artifactoryUser = artifactoryCredential("artifactory_user")
-        val artifactoryPassword = artifactoryCredential("artifactory_password")
-        val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
-          ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
-        project.logger.lifecycle("Artifactory: $artifactoryUser:$artifactoryPassword")
-
-        artifactoryExt.apply {
-          setContextUrl("https://muxinc.jfrog.io/artifactory/")
-          publish {  publisherConfig ->
-            publisherConfig.repository { repository ->
-              val matcher = VERSION_TAG_NAME_PATTERN.matcher(pluginVersion).also { it.find() }
-              val prod = matcher.matches()
-
-              if (prod) {
-                project.logger.warn("Mux: Warning!! Publishing to Prod!!")
-                repository.setRepoKey("default-maven-release-local")
-              } else {
-                repository.setRepoKey("default-maven-local")
-              }
-              repository.setUsername(artifactoryUser)
-              repository.setPassword(artifactoryPassword)
-            }
-            publisherConfig.defaults { artifactoryTask ->
-//              artifactoryTask.publications("ALL_PUBLICATIONS")
-              artifactoryTask.publications(libPublication)
-            }
-          }
+        publisherConfig.defaults { artifactoryTask ->
+          artifactoryTask.publications("library")
         }
       }
     }
