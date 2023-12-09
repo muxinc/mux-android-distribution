@@ -3,8 +3,13 @@
  */
 package com.mux.gradle.internal
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
+import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
+import java.util.*
+import java.util.regex.Pattern
 
 /**
  * Plugin that distributes the distribution plugins. Due to gradle limitations, this project can't
@@ -15,13 +20,61 @@ import org.gradle.api.Project
  */
 class InternalDistPlugin : Plugin<Project> {
 
+  val VERSION_TAG_NAME_PATTERN: Pattern = Pattern.compile("""^v(\d+\.\d+\.\d+)$""")
+
   override fun apply(project: Project) {
+    project.plugins.apply(ArtifactoryPlugin::class.java)
     project.extensions.create("dist", InternalDistExtension::class.java)
+
+    // version
     // A real version while on a tag, otherwise a dev version (different format from mux libs)
     val pluginVersion = Runtime.getRuntime().exec("git describe --tags")
       .inputStream.bufferedReader().readLines()
       .joinToString("\n").trim()
     project.version = pluginVersion
     project.logger.lifecycle("internal dist: attaching version ${project.version}")
+
+    // artifactory
+    project.tasks.named("artifactoryPublish") {
+      it.doFirst {
+        fun artifactoryCredential(key: String): String {
+          val propsFile = project.rootProject.file("local.properties")
+          if (propsFile.exists()) {
+            val props = Properties()
+            props.load(propsFile.inputStream())
+            return props.getProperty(key)
+          } else {
+            return System.getenv("ORG_GRADLE_PROJECT_$key")
+          }
+        }
+        val artifactoryUser = artifactoryCredential("artifactory_user")
+        val artifactoryPassword = artifactoryCredential("artifactory_password")
+        val artifactoryExt = project.extensions.findByType(ArtifactoryPluginConvention::class.java)
+          ?: throw GradleException("Unexpected: Artifactory plugin didn't apply")
+
+        println("... configuring artifactory with creds $artifactoryUser:$artifactoryPassword")
+        artifactoryExt.apply {
+          setContextUrl("https://muxinc.jfrog.io/artifactory/")
+          publish {  publisherConfig ->
+            publisherConfig.repository { repository ->
+              val matcher = VERSION_TAG_NAME_PATTERN.matcher(pluginVersion).also { it.find() }
+              val prod = matcher.matches()
+
+              if (prod) {
+                project.logger.warn("Mux: Warning!! Publishing to Prod!!")
+                repository.setRepoKey("default-maven-release-local")
+              } else {
+                repository.setRepoKey("default-maven-local")
+              }
+              repository.setUsername(artifactoryUser)
+              repository.setPassword(artifactoryPassword)
+            }
+            publisherConfig.defaults { artifactoryTask ->
+              artifactoryTask.publications("ALL_PUBLICATIONS")
+            }
+          }
+        }
+      }
+    }
   }
 }

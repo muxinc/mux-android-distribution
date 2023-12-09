@@ -1,7 +1,8 @@
 package com.mux.gradle.internal
 
-abstract class InternalDistExtension {
-  fun function(f: () -> Unit) {
+import org.gradle.api.provider.Property
 
-  }
+abstract class InternalDistExtension {
+  abstract fun getGroup(): Property<String>
+  abstract fun getArtifactId(): Property<String>
 }

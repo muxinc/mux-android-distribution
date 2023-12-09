@@ -23,6 +23,7 @@ dependencies {
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   implementation(gradleApi())
+  implementation("org.jfrog.buildinfo:build-info-extractor-gradle:5.1.11")
 }
 
 gradlePlugin {
