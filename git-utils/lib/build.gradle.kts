@@ -6,7 +6,8 @@ plugins {
 }
 
 dist {
-
+  getArtifactId().set("git-utils")
+  getGroup().set("com.mux.gradle.git")
 }
 
 repositories {
