@@ -61,9 +61,6 @@ class AndroidPublicationPlugin : Plugin<Project> {
     )
   }
 
-  // todo - processVariants
-  // todo - declarePublications
-
   private fun declarePublications(
     androidComponents: AndroidComponentsExtension<
             LibraryExtension,
